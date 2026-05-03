@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>许愿灯 · 易经风水</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .sky-canvas {
+      position: relative;
+      min-height: 280px;
+      overflow: hidden;
+      background: radial-gradient(ellipse at center bottom, #200a00 0%, #0d0020 60%, #000 100%);
+      border-radius: 12px;
+      margin: 12px 16px;
+    }
+    .star-bg {
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle, #fff 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px);
+      background-size: 60px 60px, 40px 40px;
+      background-position: 0 0, 30px 20px;
+      opacity: 0.4;
+    }
+    .lantern-container {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .fly-lanterns {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .wish-panel {
+      padding: 0 16px 16px;
+    }
+    .wish-type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .wish-type-btn {
+      padding: 10px 6px;
+      background: rgba(45,26,14,0.8);
+      border: 1px solid rgba(139,69,19,0.4);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text-muted);
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .wish-type-btn.active {
+      background: rgba(192,57,43,0.3);
+      border-color: var(--red-primary);
+      color: var(--text-main);
+    }
+    .wish-type-btn .wt-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+    .fortune-result {
+      background: linear-gradient(135deg, rgba(45,26,14,0.9), rgba(28,10,0,0.9));
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 14px;
+      display: none;
+    }
+    .fortune-result.show { display: block; }
+    .fortune-title {
+      font-size: 18px;
+      color: var(--gold);
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+    .fortune-text {
+      font-size: 15px;
+      color: var(--text-main);
+      line-height: 2;
+      letter-spacing: 1px;
+    }
+    .fortune-poem {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      line-height: 2;
+      font-style: italic;
+    }
+    .history-list { padding: 0 16px; }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(139,69,19,0.2);
+      font-size: 13px;
+    }
+    .history-wish { color: var(--text-muted); }
+    .history-time { color: rgba(200,168,130,0.5); font-size: 11px; }
+    .floating-lantern {
+      position: absolute;
+      animation: floatUp linear forwards;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      0%   { bottom: 80px; opacity: 1; transform: translateX(0) scale(1); }
+      100% { bottom: 120%; opacity: 0; transform: translateX(var(--drift)) scale(0.4); }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- 导航 -->
+  <div class="nav-bar">
+    <a href="index.html" class="nav-back">返回</a>
+    <div class="nav-title">许愿灯</div>
+    <div style="width:48px;"></div>
+  </div>
+
+  <!-- 天空画布 -->
+  <div class="sky-canvas" id="skyCanvas">
+    <div class="star-bg"></div>
+    <div class="fly-lanterns" id="flyLanterns"></div>
+    <div class="lantern-container">
+      <div id="mainLantern">
+        <svg width="80" height="110" viewBox="0 0 80 110" style="filter:drop-shadow(0 0 18px rgba(255,120,0,0.8));animation:lanternFloat 3s ease-in-out infinite;">
+          <defs>
+            <radialGradient id="lGrad" cx="50%" cy="40%">
+              <stop offset="0%" stop-color="#ff8c00"/>
+              <stop offset="60%" stop-color="#c0392b"/>
+              <stop offset="100%" stop-color="#7b0f0f"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="40" cy="58" rx="30" ry="42" fill="url(#lGrad)" stroke="#d4a017" stroke-width="1.5"/>
+          <rect x="37" y="14" width="6" height="10" rx="2" fill="#d4a017"/>
+          <rect x="35" y="95" width="10" height="8" rx="2" fill="#d4a017"/>
+          <line x1="40" y1="103" x2="35" y2="115" stroke="#d4a017" stroke-width="1"/>
+          <line x1="40" y1="103" x2="45" y2="115" stroke="#d4a017" stroke-width="1"/>
+          <text x="40" y="64" text-anchor="middle" fill="rgba(255,220,100,0.9)" font-size="22" font-family="serif">福</text>
+          <ellipse cx="40" cy="58" rx="15" ry="20" fill="rgba(255,200,80,0.15)"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 许愿面板 -->
+  <div class="wish-panel">
+    <div style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:12px;">
+      选择心愿类型，书写愿望，放飞许愿灯
+    </div>
+
+    <!-- 心愿类型 -->
+    <div class="wish-type-grid">
+      <button class="wish-type-btn active" data-type="事业" onclick="selectType(this)">
+        <span class="wt-icon">💼</span>事业顺遂
+      </button>
+      <button class="wish-type-btn" data-type="爱情" onclick="selectType(this)">
+        <span class="wt-icon">💕</span>爱情美满
+      </button>
+      <button class="wish-type-btn" data-type="财富" onclick="selectType(this)">
+        <span class="wt-icon">💰</span>财运亨通
+      </button>
+      <button class="wish-type-btn" data-type="健康" onclick="selectType(this)">
+        <span class="wt-icon">🌿</span>身体健康
+      </button>
+      <button class="wish-type-btn" data-type="学业" onclick="selectType(this)">
+        <span class="wt-icon">📚</span>学业进步
+      </button>
+      <button class="wish-type-btn" data-type="家庭" onclick="selectType(this)">
+        <span class="wt-icon">🏠</span>家庭幸福
+      </button>
+    </div>
+
+    <!-- 愿望输入 -->
+    <textarea class="wish-input" id="wishText" placeholder="在此写下您的心愿...（选填）" style="width:100%;margin-bottom:12px;"></textarea>
+    <button class="btn-primary btn-gold" onclick="releaseWish()">🏮 放飞许愿灯 🏮</button>
+
+    <!-- 祈福结果 -->
+    <div class="fortune-result" id="fortuneResult">
+      <div class="fortune-title" id="fortuneTitle">🏮 神明已收到您的心愿 🏮</div>
+      <div class="fortune-text" id="fortuneText"></div>
+      <div class="fortune-poem" id="fortunePoem"></div>
+    </div>
+  </div>
+
+  <!-- 心愿记录 -->
+  <div class="section-title">今日心愿</div>
+  <div class="history-list" id="historyList">
+    <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">
+      暂无心愿记录
+    </div>
+  </div>
+
+  <div class="safe-bottom"></div>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span><span class="nav-text">首页</span>
+  </a>
+  <a href="bazi.html" class="nav-item">
+    <span class="nav-icon">🔮</span><span class="nav-text">八字</span>
+  </a>
+  <a href="daily.html" class="nav-item">
+    <span class="nav-icon">🎋</span><span class="nav-text">每日签</span>
+  </a>
+  <a href="dream.html" class="nav-item">
+    <span class="nav-icon">💤</span><span class="nav-text">解梦</span>
+  </a>
+  <a href="fengshui.html" class="nav-item">
+    <span class="nav-icon">☯</span><span class="nav-text">风水</span>
+  </a>
+</nav>
+
+<script>
+let selectedType = '事业';
+const wishHistory = [];
+
+// 祈福文案库
+const FORTUNE_TEXTS = {
+  事业: [
+    { text: '天道酬勤，您的努力神明已见。鸿鹄之志，终将展翅高飞。事业之路，贵人相伴，步步高升。', poem: '乘风破浪会有时，直挂云帆济沧海。' },
+    { text: '心诚则灵，您的心愿已传达天听。阳气正旺，事业运势大开，逢凶化吉，遇难呈祥。', poem: '长风破浪冲万里，宝剑锋从磨砺出。' },
+  ],
+  爱情: [
+    { text: '月老红线，已为您牵系良缘。真心相待，情投意合，白头偕老，此生有伴。', poem: '在天愿作比翼鸟，在地愿为连理枝。' },
+    { text: '佳缘天定，您的真诚感动神明。缘分已至，有情人终成眷属，相守一生，幸福长久。', poem: '两情若是久长时，又岂在朝朝暮暮。' },
+  ],
+  财富: [
+    { text: '财神已闻您心愿，财源广进，偏财正财齐聚。东方发，西方进，南北皆是财运旺。', poem: '黄金白玉非为贵，唯有福禄寿最珍。' },
+    { text: '五路财神护佑，您的财运将节节攀升。勤劳致富，智慧理财，万贯家财指日可期。', poem: '招财进宝满门喜，福禄双全庆有余。' },
+  ],
+  健康: [
+    { text: '药王护佑，身体安康。百病消除，精力充沛，长命百岁，颐养天年。家人平安，岁岁无忧。', poem: '身体是革命的本钱，健康是人生的财富。' },
+    { text: '神明佑护，您将精气神十足，百病不侵。春夏秋冬，四季安康，寿比南山，福如东海。', poem: '寿与天齐身自健，心无杂念乐无边。' },
+  ],
+  学业: [
+    { text: '文昌帝君护佑，您的学业将突飞猛进。聪明才智，日益增长，金榜题名，前程似锦。', poem: '书山有路勤为径，学海无涯苦作舟。' },
+    { text: '文曲星君已收您心愿，智慧加持，记忆增强，考试顺利，功名可期，前途无量。', poem: '少年不知勤学苦，老来方悔读书迟。' },
+  ],
+  家庭: [
+    { text: '家和万事兴，神明保佑您的家庭幸福美满。阖家平安，子孙昌盛，岁岁欢聚，年年有余。', poem: '家是港湾，爱是归途，幸福在一起。' },
+    { text: '灶神护宅，阖家安泰。您的家庭将充满欢笑，子孝父慈，其乐融融，幸福绵长。', poem: '但愿人长久，千里共婵娟。' },
+  ]
+};
+
+function selectType(btn) {
+  document.querySelectorAll('.wish-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedType = btn.dataset.type;
+}
+
+function releaseWish() {
+  // 放飞动画
+  launchLantern();
+
+  // 抽取祈福文案
+  const texts = FORTUNE_TEXTS[selectedType] || FORTUNE_TEXTS['事业'];
+  const picked = texts[Math.floor(Math.random() * texts.length)];
+  const wishText = document.getElementById('wishText').value.trim();
+
+  const result = document.getElementById('fortuneResult');
+  result.classList.add('show');
+  document.getElementById('fortuneTitle').textContent = `🏮 ${selectedType}愿望已放飞 🏮`;
+  document.getElementById('fortuneText').textContent = picked.text;
+  document.getElementById('fortunePoem').textContent = `「${picked.poem}」`;
+
+  // 记录历史
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  wishHistory.unshift({
+    type: selectedType,
+    text: wishText || `祈求${selectedType}顺遂`,
+    time: timeStr
+  });
+  renderHistory();
+
+  result.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('wishText').value = '';
+}
+
+function launchLantern() {
+  const container = document.getElementById('flyLanterns');
+  const canvas = document.getElementById('skyCanvas');
+  const canvasW = canvas.offsetWidth;
+
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'floating-lantern';
+      const x = 20 + Math.random() * (canvasW - 60);
+      const drift = (Math.random() - 0.5) * 60 + 'px';
+      const dur = 3 + Math.random() * 2;
+      el.style.cssText = `left:${x}px;bottom:80px;--drift:${drift};animation-duration:${dur}s;font-size:${24+Math.random()*16}px;`;
+      el.textContent = '🏮';
+      container.appendChild(el);
+      setTimeout(() => el.remove(), dur * 1000);
+    }, i * 300);
+  }
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (wishHistory.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">暂无心愿记录</div>';
+    return;
+  }
+  list.innerHTML = wishHistory.slice(0, 10).map(h => `
+    <div class="history-item">
+      <div>
+        <span class="tag tag-ji" style="margin-right:6px;">${h.type}</span>
+        <span class="history-wish">${h.text}</span>
+      </div>
+      <div class="history-time">${h.time}</div>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>

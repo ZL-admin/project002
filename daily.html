@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>每日一签 · 易经风水</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .shake-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px 20px;
+      gap: 16px;
+    }
+    .shake-cup {
+      width: 90px;
+      height: 110px;
+      cursor: pointer;
+      transition: transform 0.1s;
+      user-select: none;
+    }
+    .shake-cup:active { transform: scale(0.92) rotate(5deg); }
+    .shake-hint { font-size: 13px; color: var(--text-muted); letter-spacing: 1px; }
+    .shake-btn {
+      padding: 12px 36px;
+      background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+      border: none;
+      border-radius: 24px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(192,57,43,0.4);
+    }
+    .shake-btn:active { transform: scale(0.96); }
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(139,69,19,0.3);
+      margin: 0 16px 12px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 0;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .all-hexagram-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 0 16px 16px;
+    }
+    .hex-mini-item {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(139,69,19,0.3);
+      border-radius: 8px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .hex-mini-item:active {
+      background: rgba(192,57,43,0.2);
+      border-color: var(--red-primary);
+    }
+    .hex-mini-sym { font-size: 22px; }
+    .hex-mini-name { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .detail-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 200;
+      overflow-y: auto;
+      padding: 20px 16px;
+    }
+    .detail-overlay.show { display: block; }
+    .detail-close {
+      position: sticky;
+      top: 0;
+      text-align: right;
+      padding: 4px 0 12px;
+    }
+    .close-btn {
+      background: rgba(192,57,43,0.3);
+      border: 1px solid var(--red-primary);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .shaking { animation: shake 0.5s ease; }
+    @keyframes shake {
+      0%,100%{transform:rotate(0)}
+      20%{transform:rotate(-15deg)}
+      40%{transform:rotate(15deg)}
+      60%{transform:rotate(-10deg)}
+      80%{transform:rotate(10deg)}
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- 导航 -->
+  <div class="nav-bar">
+    <a href="index.html" class="nav-back">返回</a>
+    <div class="nav-title">每日一签</div>
+    <div style="width:48px;"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('daily')">今日卦象</button>
+    <button class="tab-btn" onclick="switchTab('shake')">摇卦起课</button>
+    <button class="tab-btn" onclick="switchTab('all')">六十四卦</button>
+  </div>
+
+  <!-- 今日卦象 -->
+  <div id="tab-daily" class="tab-content active">
+    <div class="card">
+      <div class="card-title">今日天象</div>
+      <div id="dailyHexDisplay" class="hexagram-display"></div>
+    </div>
+    <div class="card" id="dailyDetailCard">
+      <div class="card-title">卦辞详解</div>
+      <div id="dailyDetail" style="font-size:13px;color:var(--text-muted);line-height:2;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">象辞指引</div>
+      <div id="dailyImage" style="font-size:14px;color:var(--text-main);line-height:1.9;text-align:center;padding:8px 0;"></div>
+    </div>
+  </div>
+
+  <!-- 摇卦 -->
+  <div id="tab-shake" class="tab-content">
+    <div class="shake-area">
+      <div style="font-size:14px;color:var(--text-muted);text-align:center;">心中默念所问之事，<br>摇动签筒，诚心求卦</div>
+      <svg class="shake-cup" id="shakeCup" viewBox="0 0 90 110" onclick="shakeHexagram()">
+        <defs>
+          <linearGradient id="cupGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c0392b"/>
+            <stop offset="100%" stop-color="#7b0f0f"/>
+          </linearGradient>
+        </defs>
+        <!-- 签筒 -->
+        <rect x="15" y="20" width="60" height="75" rx="8" fill="url(#cupGrad)" stroke="#d4a017" stroke-width="1.5"/>
+        <rect x="20" y="15" width="50" height="12" rx="4" fill="#96281b" stroke="#d4a017" stroke-width="1"/>
+        <!-- 签棒 -->
+        <line x1="45" y1="5" x2="42" y2="18" stroke="#d4a017" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="50" y1="3" x2="48" y2="16" stroke="#c8a882" stroke-width="2" stroke-linecap="round"/>
+        <line x1="38" y1="6" x2="36" y2="18" stroke="#d4a017" stroke-width="2" stroke-linecap="round"/>
+        <!-- 装饰 -->
+        <text x="45" y="62" text-anchor="middle" fill="#d4a017" font-size="24" font-family="serif">☯</text>
+        <text x="45" y="82" text-anchor="middle" fill="rgba(212,160,23,0.6)" font-size="10" font-family="serif">易经</text>
+      </svg>
+      <button class="shake-btn" onclick="shakeHexagram()">✦ 摇卦 ✦</button>
+    </div>
+
+    <div id="shakeResult" style="display:none;">
+      <div class="card">
+        <div class="card-title">卦象结果</div>
+        <div id="shakeHexDisplay" class="hexagram-display"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">卦辞与释义</div>
+        <div id="shakeDetail" style="font-size:13px;color:var(--text-muted);line-height:2;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 六十四卦列表 -->
+  <div id="tab-all" class="tab-content">
+    <div class="all-hexagram-grid" id="allHexGrid"></div>
+  </div>
+
+  <div class="safe-bottom"></div>
+</div>
+
+<!-- 卦象详情弹层 -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-close">
+    <button class="close-btn" onclick="closeDetail()">✕ 关闭</button>
+  </div>
+  <div class="hexagram-display" id="overlayHexDisplay"></div>
+  <div class="card">
+    <div class="card-title">卦辞</div>
+    <div id="overlayJudgment" style="font-size:14px;color:var(--text-muted);line-height:2;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">象传</div>
+    <div id="overlayImage" style="font-size:14px;color:var(--text-main);line-height:2;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">综合释义</div>
+    <div id="overlayMeaning" style="font-size:14px;color:var(--text-muted);line-height:2;"></div>
+  </div>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span><span class="nav-text">首页</span>
+  </a>
+  <a href="bazi.html" class="nav-item">
+    <span class="nav-icon">🔮</span><span class="nav-text">八字</span>
+  </a>
+  <a href="daily.html" class="nav-item active">
+    <span class="nav-icon">🎋</span><span class="nav-text">每日签</span>
+  </a>
+  <a href="dream.html" class="nav-item">
+    <span class="nav-icon">💤</span><span class="nav-text">解梦</span>
+  </a>
+  <a href="fengshui.html" class="nav-item">
+    <span class="nav-icon">☯</span><span class="nav-text">风水</span>
+  </a>
+</nav>
+
+<script src="js/hexagram.js"></script>
+<script>
+// Tab切换
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    const tabs = ['daily','shake','all'];
+    b.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === 'tab-'+name);
+  });
+}
+
+function renderHex(hex, containerId, small=false) {
+  const luckClass = hex.luck==='大吉'?'ji':hex.luck==='凶'?'xiong':'ping';
+  document.getElementById(containerId).innerHTML = `
+    <div class="hexagram-symbol" style="${small?'font-size:48px;':''}">${hex.symbol}</div>
+    <div class="hexagram-name">${hex.fullName}</div>
+    <div style="margin:6px 0;">
+      <span class="tag tag-${luckClass}">${hex.luck}</span>
+      ${hex.tags.map(t=>`<span class="tag tag-ping" style="margin-left:4px;">${t}</span>`).join('')}
+    </div>
+    <div class="hexagram-judgment">${hex.meaning}</div>
+  `;
+}
+
+// 今日卦象
+const now = new Date();
+const dateKey = `${now.getFullYear()}${now.getMonth()+1}${now.getDate()}`;
+const dailyHex = HEXAGRAM.getByDate(dateKey);
+renderHex(dailyHex, 'dailyHexDisplay');
+document.getElementById('dailyDetail').innerHTML = `
+  <p><strong style="color:var(--gold);">卦辞：</strong>${dailyHex.judgment}</p>
+  <p style="margin-top:8px;">第 ${dailyHex.number} 卦 · ${dailyHex.fullName}</p>
+  <p style="margin-top:6px;">上卦：${dailyHex.upper} 下卦：${dailyHex.lower}</p>
+`;
+document.getElementById('dailyImage').innerHTML = `「${dailyHex.image}」`;
+
+// 摇卦
+function shakeHexagram() {
+  const cup = document.getElementById('shakeCup');
+  cup.classList.remove('shaking');
+  void cup.offsetWidth;
+  cup.classList.add('shaking');
+  setTimeout(() => {
+    const hex = HEXAGRAM.shake();
+    document.getElementById('shakeResult').style.display = 'block';
+    renderHex(hex, 'shakeHexDisplay');
+    document.getElementById('shakeDetail').innerHTML = `
+      <p><strong style="color:var(--gold);">卦辞：</strong>${hex.judgment}</p>
+      <p style="margin-top:8px;"><strong style="color:var(--gold);">象传：</strong>${hex.image}</p>
+      <p style="margin-top:8px;">第 ${hex.number} 卦 · ${hex.fullName}</p>
+    `;
+    document.getElementById('shakeResult').scrollIntoView({ behavior: 'smooth' });
+  }, 500);
+}
+
+// 六十四卦网格
+const allGrid = document.getElementById('allHexGrid');
+HEXAGRAM.HEXAGRAMS.forEach(hex => {
+  const div = document.createElement('div');
+  div.className = 'hex-mini-item';
+  div.innerHTML = `<div class="hex-mini-sym">${hex.symbol}</div><div class="hex-mini-name">${hex.name}</div>`;
+  div.onclick = () => openDetail(hex);
+  allGrid.appendChild(div);
+});
+
+function openDetail(hex) {
+  document.getElementById('overlayHexDisplay').innerHTML = `
+    <div class="hexagram-symbol">${hex.symbol}</div>
+    <div class="hexagram-name">${hex.fullName}</div>
+    <span class="tag tag-${hex.luck==='大吉'?'ji':hex.luck==='凶'?'xiong':'ping'}">${hex.luck}</span>
+  `;
+  document.getElementById('overlayJudgment').textContent = hex.judgment;
+  document.getElementById('overlayImage').textContent = hex.image;
+  document.getElementById('overlayMeaning').textContent = hex.meaning;
+  document.getElementById('detailOverlay').classList.add('show');
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('show');
+}
+</script>
+</body>
+</html>

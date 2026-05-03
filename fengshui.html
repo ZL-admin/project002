@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>风水罗盘 · 易经风水</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .compass-section { padding: 0 16px; }
+    .compass-outer {
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #3d1a0a, #1c0a00);
+      border: 3px solid var(--gold);
+      box-shadow: 0 0 40px rgba(212,160,23,0.3), inset 0 0 30px rgba(0,0,0,0.5);
+      margin: 20px auto;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .compass-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(212,160,23,0.3);
+    }
+    .compass-needle {
+      position: absolute;
+      width: 4px;
+      height: 60px;
+      top: 50%;
+      left: 50%;
+      transform-origin: bottom center;
+      transform: translateX(-50%) translateY(-100%);
+      border-radius: 2px 2px 0 0;
+      background: linear-gradient(to bottom, #e74c3c, #c0392b);
+      box-shadow: 0 0 6px rgba(231,76,60,0.6);
+      transition: transform 1s ease;
+    }
+    .compass-needle.south {
+      background: linear-gradient(to top, #bdc3c7, #95a5a6);
+    }
+    .compass-dot {
+      position: absolute;
+      width: 12px; height: 12px;
+      background: var(--gold);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      box-shadow: 0 0 8px rgba(212,160,23,0.6);
+    }
+    .dir-label {
+      position: absolute;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .dir-label.main { font-size: 15px; color: #e74c3c; }
+    .bagua-ring { position: absolute; width: 100%; height: 100%; }
+    .bagua-item {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      transform: translate(-50%, -50%);
+    }
+    .bagua-item .sym { font-size: 16px; }
+    .direction-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .dir-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(139,69,19,0.35);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .dir-card:active, .dir-card.selected {
+      background: rgba(192,57,43,0.2);
+      border-color: var(--red-primary);
+    }
+    .dir-card .dc-dir { font-size: 14px; color: var(--gold); margin-bottom: 4px; }
+    .dir-card .dc-bagua { font-size: 20px; }
+    .dir-card .dc-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .layout-tips {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .tip-item {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(139,69,19,0.3);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .tip-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .tip-val { font-size: 13px; color: var(--text-main); }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- 导航 -->
+  <div class="nav-bar">
+    <a href="index.html" class="nav-back">返回</a>
+    <div class="nav-title">风水罗盘</div>
+    <div style="width:48px;"></div>
+  </div>
+
+  <!-- 罗盘 -->
+  <div style="display:flex;justify-content:center;">
+    <div class="compass-outer" id="compass">
+      <!-- 外圈装饰 -->
+      <div class="compass-ring" style="width:260px;height:260px;"></div>
+      <div class="compass-ring" style="width:220px;height:220px;border-color:rgba(212,160,23,0.2);"></div>
+
+      <!-- 八卦方位标签 -->
+      <div class="bagua-ring" id="baguaRing"></div>
+
+      <!-- 指针 -->
+      <div class="compass-needle" id="needleN"></div>
+      <div class="compass-needle south" style="transform:translateX(-50%) translateY(0%) rotate(180deg);"></div>
+      <div class="compass-dot"></div>
+
+      <!-- 中心文字 -->
+      <div style="position:absolute;text-align:center;z-index:5;">
+        <div style="font-size:22px;color:var(--red-light);">☯</div>
+        <div style="font-size:10px;color:var(--text-muted);">太极</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 旋转按钮 -->
+  <div style="display:flex;justify-content:center;gap:12px;padding:0 16px 10px;">
+    <button onclick="rotateCompass(-45)" style="padding:8px 20px;background:rgba(0,0,0,0.4);border:1px solid rgba(139,69,19,0.5);border-radius:20px;color:var(--text-muted);font-size:14px;cursor:pointer;">◀ 逆转</button>
+    <button onclick="rotateCompass(0)" style="padding:8px 20px;background:rgba(192,57,43,0.3);border:1px solid var(--red-primary);border-radius:20px;color:#fff;font-size:14px;cursor:pointer;">复位</button>
+    <button onclick="rotateCompass(45)" style="padding:8px 20px;background:rgba(0,0,0,0.4);border:1px solid rgba(139,69,19,0.5);border-radius:20px;color:var(--text-muted);font-size:14px;cursor:pointer;">顺转 ▶</button>
+  </div>
+
+  <!-- 方位选择 -->
+  <div class="section-title">方位旺衰查询</div>
+  <div class="compass-section">
+    <div style="margin-bottom:10px;">
+      <label class="form-label">选择命卦/流年飞星</label>
+      <select class="form-select" id="minggua" onchange="onMingguaChange()">
+        <option value="">选择命卦（按出生年份）</option>
+        <option value="乾">乾命（六白金星）西北旺</option>
+        <option value="坤">坤命（二黑土星）西南旺</option>
+        <option value="震">震命（三碧木星）东方旺</option>
+        <option value="巽">巽命（四绿木星）东南旺</option>
+        <option value="坎">坎命（一白水星）北方旺</option>
+        <option value="离">离命（九紫火星）南方旺</option>
+        <option value="艮">艮命（八白土星）东北旺</option>
+        <option value="兑">兑命（七赤金星）西方旺</option>
+      </select>
+    </div>
+
+    <div class="direction-grid" id="dirGrid"></div>
+
+    <!-- 当前方位解析 -->
+    <div id="dirDetail" style="display:none;">
+      <div class="card" style="margin-top:10px;">
+        <div class="card-title" id="dirDetailTitle">方位解析</div>
+        <div id="dirDetailContent" style="font-size:13px;color:var(--text-muted);line-height:1.8;"></div>
+        <div class="layout-tips" id="layoutTips"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 风水布局建议 -->
+  <div class="section-title">居家风水</div>
+  <div class="compass-section" style="padding-bottom:16px;">
+    <div class="card" style="margin:0 0 10px;">
+      <div class="card-title">客厅风水</div>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.8;">
+        客厅宜明亮宽敞，大门正对方向为纳气之位。沙发靠实墙，不可背对门口。客厅中央不宜置柱，影响气流通畅。财位一般在进门对角线位置，可置绿植或招财摆件。
+      </div>
+    </div>
+    <div class="card" style="margin:0 0 10px;">
+      <div class="card-title">卧室风水</div>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.8;">
+        床头宜靠实墙，有依托感，利于安眠。床位不可正对门，不可压在横梁之下。卧室宜柔和温馨，避免放置大镜子正对床铺。床头位置根据命卦选择吉方。
+      </div>
+    </div>
+    <div class="card" style="margin:0;">
+      <div class="card-title">玄关风水</div>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.8;">
+        玄关是住宅纳气的关键。宜明亮整洁，可置镜以扩展空间，但镜子不可正对大门。玄关可放置招财植物如发财树，鞋柜宜封闭，减少浊气外露。
+      </div>
+    </div>
+  </div>
+
+  <div class="safe-bottom"></div>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span><span class="nav-text">首页</span>
+  </a>
+  <a href="bazi.html" class="nav-item">
+    <span class="nav-icon">🔮</span><span class="nav-text">八字</span>
+  </a>
+  <a href="daily.html" class="nav-item">
+    <span class="nav-icon">🎋</span><span class="nav-text">每日签</span>
+  </a>
+  <a href="dream.html" class="nav-item">
+    <span class="nav-icon">💤</span><span class="nav-text">解梦</span>
+  </a>
+  <a href="fengshui.html" class="nav-item active">
+    <span class="nav-icon">☯</span><span class="nav-text">风水</span>
+  </a>
+</nav>
+
+<script>
+// 八卦方位数据
+const BAGUA_DIRS = [
+  { name:'乾', sym:'☰', dir:'西北', angle: 315, wuxing:'金', color:'#bdc3c7', gua:'乾为天', desc:'西北乾位，主男主事业，财运亨通。此方适合设置书房或工作区，有利事业发展与贵人相助。' },
+  { name:'坎', sym:'☵', dir:'北',   angle: 0,   wuxing:'水', color:'#3498db', gua:'坎为水', desc:'北方坎位，主仕途、事业与贵人。此方宜置水族箱或流水摆件，有助于事业与官运亨通。' },
+  { name:'艮', sym:'☶', dir:'东北', angle: 45,  wuxing:'土', color:'#d4a017', gua:'艮为山', desc:'东北艮位，主子嗣、学业与旺丁。此方适合设置儿童房或书房，有利读书考试与家族旺盛。' },
+  { name:'震', sym:'☳', dir:'东',   angle: 90,  wuxing:'木', color:'#27ae60', gua:'震为雷', desc:'东方震位，主长子、事业进取。此方适合摆放绿植，增旺木气，有利事业奋进与家族兴旺。' },
+  { name:'巽', sym:'☴', dir:'东南', angle: 135, wuxing:'木', color:'#2ecc71', gua:'巽为风', desc:'东南巽位，主财富与女性。此方为传统财位，适合置招财风水物品，有利财运亨通与感情。' },
+  { name:'离', sym:'☲', dir:'南',   angle: 180, wuxing:'火', color:'#e74c3c', gua:'离为火', desc:'南方离位，主声名、文运与中女。此方适合挂红色装饰，有助于提升名气与文昌运势。' },
+  { name:'坤', sym:'☷', dir:'西南', angle: 225, wuxing:'土', color:'#8b7355', gua:'坤为地', desc:'西南坤位，主母亲、感情与婚姻。此方适合摆放成对装饰品，有利感情和谐与婚姻美满。' },
+  { name:'兑', sym:'☱', dir:'西',   angle: 270, wuxing:'金', color:'#95a5a6', gua:'兑为泽', desc:'西方兑位，主少女、口才与娱乐。此方适合金属或白色装饰，有利口才沟通与桃花缘分。' }
+];
+
+// 绘制八卦环
+const baguaRing = document.getElementById('baguaRing');
+const R = 118; // 距中心半径
+BAGUA_DIRS.forEach(bg => {
+  const rad = (bg.angle - 90) * Math.PI / 180;
+  const x = 140 + R * Math.cos(rad);
+  const y = 140 + R * Math.sin(rad);
+  const div = document.createElement('div');
+  div.className = 'bagua-item';
+  div.style.cssText = `left:${x}px;top:${y}px;`;
+  div.innerHTML = `<div class="sym" style="color:${bg.color}">${bg.sym}</div><div>${bg.dir}</div>`;
+  baguaRing.appendChild(div);
+});
+
+// 方位网格
+const dirGrid = document.getElementById('dirGrid');
+BAGUA_DIRS.forEach(bg => {
+  const div = document.createElement('div');
+  div.className = 'dir-card';
+  div.innerHTML = `
+    <div class="dc-bagua" style="color:${bg.color}">${bg.sym}</div>
+    <div class="dc-dir">${bg.dir}</div>
+    <div class="dc-label">${bg.name}·${bg.wuxing}</div>
+  `;
+  div.onclick = () => showDirDetail(bg, div);
+  dirGrid.appendChild(div);
+});
+
+function showDirDetail(bg, el) {
+  document.querySelectorAll('.dir-card').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const detail = document.getElementById('dirDetail');
+  detail.style.display = 'block';
+  document.getElementById('dirDetailTitle').textContent = `${bg.dir}（${bg.name}宫·${bg.gua}）`;
+  document.getElementById('dirDetailContent').textContent = bg.desc;
+
+  document.getElementById('layoutTips').innerHTML = `
+    <div class="tip-item">
+      <div class="tip-label">五行</div>
+      <div class="tip-val">${bg.wuxing}</div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-label">卦名</div>
+      <div class="tip-val">${bg.gua}</div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-label">方位吉色</div>
+      <div class="tip-val">${{金:'白、金',木:'绿、青',水:'黑、蓝',火:'红、紫',土:'黄、棕'}[bg.wuxing]}</div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-label">宜摆</div>
+      <div class="tip-val">${{金:'金属物、白花',木:'绿植、木制品',水:'鱼缸、水晶',火:'灯饰、红色摆件',土:'陶瓷、黄晶'}[bg.wuxing]}</div>
+    </div>
+  `;
+  detail.scrollIntoView({ behavior: 'smooth' });
+}
+
+function onMingguaChange() {
+  // 可根据命卦高亮吉方
+}
+
+// 罗盘旋转
+let currentAngle = 0;
+function rotateCompass(delta) {
+  if (delta === 0) {
+    currentAngle = 0;
+  } else {
+    currentAngle += delta;
+  }
+  document.getElementById('baguaRing').style.transform = `rotate(${currentAngle}deg)`;
+  document.getElementById('needleN').style.transform = `translateX(-50%) translateY(-100%) rotate(${-currentAngle}deg)`;
+}
+</script>
+</body>
+</html>
