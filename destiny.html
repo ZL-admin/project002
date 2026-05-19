@@ -84,7 +84,6 @@
   <a href="dream.html"   class="nav-item"><span class="nav-icon">🌙</span>解梦</a>
 </nav>
 
-<script src="js/daily.js"></script>
 <script src="js/bazi.js"></script>
 <script>
 (function(){const c=document.getElementById('star-canvas'),ctx=c.getContext('2d');let stars=[];function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}function init(){resize();stars=Array.from({length:100},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1+0.2,a:Math.random(),speed:Math.random()*0.003+0.001}));}function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.a+=s.speed;if(s.a>1)s.a=0;const alpha=Math.abs(Math.sin(s.a*Math.PI));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,220,${alpha*0.6})`;ctx.fill();});requestAnimationFrame(draw);}window.addEventListener('resize',init);init();draw();})();
