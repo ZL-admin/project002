@@ -1,194 +1,94 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>周公解梦 · 易经风水</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .no-result {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-    .no-result .icon { font-size: 48px; margin-bottom: 12px; }
-    .cat-scroll {
-      display: flex;
-      gap: 8px;
-      padding: 8px 16px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .cat-scroll::-webkit-scrollbar { display: none; }
-    .cat-btn {
-      flex: 0 0 auto;
-      padding: 6px 16px;
-      background: rgba(45,26,14,0.8);
-      border: 1px solid rgba(139,69,19,0.4);
-      border-radius: 20px;
-      color: var(--text-muted);
-      font-family: inherit;
-      font-size: 13px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-    .cat-btn.active {
-      background: rgba(192,57,43,0.3);
-      border-color: var(--red-primary);
-      color: var(--text-main);
-    }
-    .result-count {
-      padding: 4px 16px 8px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .highlight { color: var(--gold); font-weight: bold; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>昨夜的梦 · 天机命理</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="page-wrapper">
+<canvas id="star-canvas"></canvas>
 
-  <!-- 导航 -->
-  <div class="nav-bar">
-    <a href="index.html" class="nav-back">返回</a>
-    <div class="nav-title">周公解梦</div>
-    <div style="width:48px;"></div>
+<div class="topbar">
+  <div>
+    <div class="topbar-title">🌙 昨夜的梦</div>
+    <div class="topbar-sub">你昨晚梦到了什么？</div>
   </div>
-
-  <!-- 搜索 -->
-  <div class="search-wrap">
-    <input type="text" class="search-input" id="searchInput" placeholder="输入梦境关键词，如：龙、飞翔、蛇..." oninput="onSearch()">
-    <button class="search-btn" onclick="doSearch()">解梦</button>
-  </div>
-
-  <!-- 热门标签 -->
-  <div class="dream-tags" id="hotTags"></div>
-
-  <!-- 分类筛选 -->
-  <div class="cat-scroll" id="catScroll">
-    <button class="cat-btn active" onclick="filterCategory('')">全部</button>
-  </div>
-
-  <!-- 结果统计 -->
-  <div class="result-count" id="resultCount"></div>
-
-  <!-- 结果列表 -->
-  <div class="dream-result-list" id="dreamResults"></div>
-
-  <div class="safe-bottom"></div>
 </div>
 
-<!-- 底部导航 -->
+<div class="page">
+  <div style="height:16px;"></div>
+
+  <div class="card fade-in" style="margin-bottom:12px;">
+    <div class="search-bar">
+      <input class="search-input" id="search-input" placeholder="输入梦境关键词…" oninput="doSearch()">
+      <button class="search-btn" onclick="doSearch()">搜索</button>
+    </div>
+    <div class="cat-tabs" id="cat-tabs"></div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">热门标签</div>
+    <div class="hot-tags" id="hot-tags"></div>
+  </div>
+
+  <div id="results"></div>
+</div>
+
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item">
-    <span class="nav-icon">🏠</span><span class="nav-text">首页</span>
-  </a>
-  <a href="bazi.html" class="nav-item">
-    <span class="nav-icon">🔮</span><span class="nav-text">八字</span>
-  </a>
-  <a href="daily.html" class="nav-item">
-    <span class="nav-icon">🎋</span><span class="nav-text">每日签</span>
-  </a>
-  <a href="dream.html" class="nav-item active">
-    <span class="nav-icon">💤</span><span class="nav-text">解梦</span>
-  </a>
-  <a href="fengshui.html" class="nav-item">
-    <span class="nav-icon">☯</span><span class="nav-text">风水</span>
-  </a>
+  <a href="index.html"   class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+  <a href="destiny.html" class="nav-item"><span class="nav-icon">☯️</span>命运</a>
+  <a href="sign.html"    class="nav-item"><span class="nav-icon">🔮</span>今日签</a>
+  <a href="yuanfen.html" class="nav-item"><span class="nav-icon">💑</span>缘分</a>
+  <a href="dream.html"   class="nav-item active"><span class="nav-icon">🌙</span>解梦</a>
 </nav>
 
 <script src="js/dream.js"></script>
 <script>
-let currentCategory = '';
-let currentQuery = '';
+(function(){const c=document.getElementById('star-canvas'),ctx=c.getContext('2d');let stars=[];function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}function init(){resize();stars=Array.from({length:80},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1+0.2,a:Math.random(),speed:Math.random()*0.003+0.001}));}function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.a+=s.speed;if(s.a>1)s.a=0;const alpha=Math.abs(Math.sin(s.a*Math.PI));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(200,180,255,${alpha*0.5})`;ctx.fill();});requestAnimationFrame(draw);}window.addEventListener('resize',init);init();draw();})();
 
-const luckIcon = { '大吉':'🔶', '吉':'🟡', '中':'⬜', '凶':'🔴' };
+let curCat = '全部';
 
-// 热门标签
-const hotTagsEl = document.getElementById('hotTags');
-DREAM.HOT_KEYWORDS.slice(0, 12).forEach(kw => {
-  const span = document.createElement('span');
-  span.className = 'dream-tag';
-  span.textContent = kw;
-  span.onclick = () => {
-    document.getElementById('searchInput').value = kw;
-    currentQuery = kw;
-    renderResults(DREAM.search(kw));
-    document.getElementById('resultCount').textContent = `搜索"${kw}"共找到 ${DREAM.search(kw).length} 条结果`;
-  };
-  hotTagsEl.appendChild(span);
-});
+document.getElementById('cat-tabs').innerHTML = DREAM_CATEGORIES.map(cat =>
+  `<div class="cat-tab${cat===curCat?' active':''}" onclick="setCat('${cat}')">${cat}</div>`
+).join('');
 
-// 分类按钮
-const catScroll = document.getElementById('catScroll');
-DREAM.CATEGORIES.forEach(cat => {
-  const btn = document.createElement('button');
-  btn.className = 'cat-btn';
-  btn.textContent = cat;
-  btn.onclick = () => filterCategory(cat, btn);
-  catScroll.appendChild(btn);
-});
+const hotKeywords = ['龙','鱼','飞翔','钱','太阳','房子','婴儿','大海','花','老虎','结婚','彩虹'];
+document.getElementById('hot-tags').innerHTML = hotKeywords.map(kw =>
+  `<span class="hot-tag" onclick="searchTag('${kw}')">${kw}</span>`
+).join('');
 
-function filterCategory(cat, btn) {
-  currentCategory = cat;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  else document.querySelector('.cat-btn').classList.add('active');
+renderResults(DREAM_DICT.slice(0,20));
 
-  let results = cat ? DREAM.byCategory(cat) : DREAM.DICT;
-  if (currentQuery) results = results.filter(d => d.keyword.includes(currentQuery) || currentQuery.includes(d.keyword));
-  renderResults(results);
-  document.getElementById('resultCount').textContent = `共 ${results.length} 条`;
-}
-
-function onSearch() {
-  currentQuery = document.getElementById('searchInput').value.trim();
-  if (!currentQuery) {
-    renderResults(currentCategory ? DREAM.byCategory(currentCategory) : DREAM.random(10));
-    document.getElementById('resultCount').textContent = '';
-    return;
-  }
+function setCat(cat) {
+  curCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(t =>
+    t.classList.toggle('active', t.textContent===cat));
   doSearch();
 }
-
-function doSearch() {
-  currentQuery = document.getElementById('searchInput').value.trim();
-  if (!currentQuery) return;
-  const results = DREAM.search(currentQuery);
-  renderResults(results);
-  document.getElementById('resultCount').textContent = `搜索"${currentQuery}"找到 ${results.length} 条`;
+function searchTag(kw) {
+  document.getElementById('search-input').value = kw;
+  doSearch();
 }
-
-function renderResults(list) {
-  const container = document.getElementById('dreamResults');
-  if (!list || list.length === 0) {
-    container.innerHTML = `
-      <div class="no-result">
-        <div class="icon">🔍</div>
-        <div>暂无相关梦境解析</div>
-        <div style="margin-top:6px;font-size:12px;">试试其他关键词，如：龙、蛇、飞翔</div>
-      </div>`;
+function doSearch() {
+  const kw = document.getElementById('search-input').value.trim();
+  renderResults(searchDreams(kw, curCat).slice(0,30));
+}
+function renderResults(results) {
+  if (!results.length) {
+    document.getElementById('results').innerHTML =
+      '<div class="empty"><div class="empty-icon">🌙</div>未找到相关梦境，换个关键词试试</div>';
     return;
   }
-  container.innerHTML = list.map(d => `
-    <div class="dream-item animate-in">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <div class="dream-keyword">${luckIcon[d.luck]||''} ${d.keyword}</div>
-        <div style="display:flex;gap:4px;">
-          <span class="tag tag-ping">${d.category}</span>
-          <span class="tag tag-${d.luck==='大吉'?'ji':d.luck==='凶'?'xiong':'ping'}">${d.luck}</span>
-        </div>
+  const fc = {'大吉':'#c9a84c','吉':'#81c784','中':'#90caf9','凶':'#ef9a9a'};
+  document.getElementById('results').innerHTML = results.map(d =>
+    `<div class="dream-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="dream-kw">梦见${d.kw}</div>
+        <span class="tag" style="color:${fc[d.fortune]||'var(--gold)'};border-color:${fc[d.fortune]||'var(--gold)'}44;">${d.fortune}</span>
       </div>
       <div class="dream-meaning">${d.meaning}</div>
-    </div>
-  `).join('');
+      <div class="dream-detail">${d.detail}</div>
+    </div>`
+  ).join('');
 }
-
-// 初始展示随机10条
-renderResults(DREAM.random(10));
-document.getElementById('resultCount').textContent = `随机展示 10 条 · 搜索查看更多`;
 </script>
 </body>
 </html>

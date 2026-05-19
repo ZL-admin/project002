@@ -1,255 +1,155 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>九宫算命 · 易经风水</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .jiugong-wrap { padding: 0 16px; }
-    .num-input-row {
-      display: flex; align-items: center; justify-content: center;
-      gap: 10px; margin: 16px 0;
-    }
-    .num-input {
-      width: 70px; height: 70px;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid var(--gold);
-      border-radius: 10px;
-      color: var(--gold);
-      font-size: 28px;
-      text-align: center;
-      font-family: inherit;
-      outline: none;
-    }
-    .num-sep { color: var(--text-muted); font-size: 20px; }
-    .star-desc { margin-top: 12px; }
-    .star-item {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(139,69,19,0.3);
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin-bottom: 8px;
-    }
-    .star-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 6px;
-    }
-    .star-name { font-size: 15px; color: var(--gold); }
-    .star-body { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
-    .palace-name { font-size: 11px; color: var(--red-light); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>数字命运 · 天机命理</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="page-wrapper">
+<canvas id="star-canvas"></canvas>
 
-  <!-- 导航 -->
-  <div class="nav-bar">
-    <a href="index.html" class="nav-back">返回</a>
-    <div class="nav-title">九宫算命</div>
-    <div style="width:48px;"></div>
+<div class="topbar">
+  <div>
+    <div class="topbar-title">🔢 数字命运</div>
+    <div class="topbar-sub">出生数字藏着什么秘密</div>
   </div>
-
-  <!-- 说明 -->
-  <div class="card">
-    <div class="card-title">九星飞泊</div>
-    <div style="font-size:13px;color:var(--text-muted);line-height:1.8;">
-      九宫命理源自洛书九宫，以出生年份推算本命宫位，结合流年飞星判断运势吉凶。输入出生年份即可查询。
-    </div>
-  </div>
-
-  <!-- 输入 -->
-  <div class="jiugong-wrap">
-    <div class="form-group">
-      <label class="form-label">出生年份</label>
-      <input type="number" class="form-input" id="jgYear" placeholder="例如：1990" min="1900" max="2099">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">性别</label>
-        <select class="form-select" id="jgGender">
-          <option value="男">男</option>
-          <option value="女">女</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">查询年份</label>
-        <input type="number" class="form-input" id="jgQueryYear" placeholder="流年" min="1900" max="2099">
-      </div>
-    </div>
-    <button class="btn-primary" onclick="calcJiugong()" style="margin-bottom:16px;">✦ 起宫排盘 ✦</button>
-  </div>
-
-  <!-- 结果 -->
-  <div id="jgResult" style="display:none;">
-    <div class="section-title">九宫布局</div>
-    <div class="jiugong-wrap">
-      <div class="jiugong-grid" id="jgGrid"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">本命宫解析</div>
-      <div class="result-panel" id="jgBasePanel"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">流年运势</div>
-      <div class="star-desc" id="jgStarDesc"></div>
-    </div>
-  </div>
-
-  <div class="safe-bottom"></div>
 </div>
 
-<!-- 底部导航 -->
+<div class="page">
+  <div style="height:16px;"></div>
+
+  <!-- Input -->
+  <div class="card fade-in" style="margin-bottom:12px;">
+    <div class="section-title">输入出生日期</div>
+    <div class="form-group">
+      <label class="form-label">出生日期</label>
+      <input type="date" class="form-input" id="birth-date" value="1990-01-01">
+    </div>
+    <button class="btn btn-gold btn-full" onclick="calcDestinyNumber()">✦ 解析数字命运</button>
+  </div>
+
+  <!-- Result -->
+  <div id="result" style="display:none;">
+
+    <!-- Life Path Number -->
+    <div class="card fade-in" style="margin-bottom:12px;text-align:center;">
+      <div class="section-title" style="justify-content:center;">生命数字</div>
+      <div style="font-family:'Noto Serif SC',serif;font-size:72px;font-weight:700;
+        background:linear-gradient(135deg,var(--gold-dk),var(--gold-lt));
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+        background-clip:text;line-height:1;margin:8px 0;" id="life-num">—</div>
+      <div style="font-size:15px;color:var(--gold);" id="life-title">—</div>
+      <div style="font-size:13px;color:var(--text3);margin-top:8px;line-height:1.6;padding:0 12px;" id="life-desc">—</div>
+    </div>
+
+    <!-- Nine Palace -->
+    <div class="card fade-in-2" style="margin-bottom:12px;">
+      <div class="section-title">九宫飞星图</div>
+      <div class="nine-grid" id="nine-grid"></div>
+    </div>
+
+    <!-- Sub Numbers -->
+    <div class="card fade-in-3" style="margin-bottom:12px;">
+      <div class="section-title">辅助数字解析</div>
+      <div id="sub-nums"></div>
+    </div>
+
+  </div>
+</div>
+
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item">
-    <span class="nav-icon">🏠</span><span class="nav-text">首页</span>
-  </a>
-  <a href="bazi.html" class="nav-item">
-    <span class="nav-icon">🔮</span><span class="nav-text">八字</span>
-  </a>
-  <a href="daily.html" class="nav-item">
-    <span class="nav-icon">🎋</span><span class="nav-text">每日签</span>
-  </a>
-  <a href="dream.html" class="nav-item">
-    <span class="nav-icon">💤</span><span class="nav-text">解梦</span>
-  </a>
-  <a href="fengshui.html" class="nav-item">
-    <span class="nav-icon">☯</span><span class="nav-text">风水</span>
-  </a>
+  <a href="index.html"   class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+  <a href="destiny.html" class="nav-item"><span class="nav-icon">☯️</span>命运</a>
+  <a href="sign.html"    class="nav-item"><span class="nav-icon">🔮</span>今日签</a>
+  <a href="yuanfen.html" class="nav-item"><span class="nav-icon">💑</span>缘分</a>
+  <a href="dream.html"   class="nav-item"><span class="nav-icon">🌙</span>解梦</a>
 </nav>
 
 <script>
-// 九星数据
-const NINE_STARS = {
-  1: { name: '一白水星', element: '水', luck: '吉', short: '一白', desc: '主贵人、考试、学业有利，感情顺遂，文昌运旺。', color: '#3498db' },
-  2: { name: '二黑土星', element: '土', luck: '凶', short: '二黑', desc: '主病符、劳碌、是非口舌，身体需注意，工作压力大。', color: '#8b7355' },
-  3: { name: '三碧木星', element: '木', luck: '凶', short: '三碧', desc: '主争讼、官非、口舌是非，需谨防小人，避免冲突。', color: '#27ae60' },
-  4: { name: '四绿木星', element: '木', luck: '吉', short: '四绿', desc: '主文昌、才艺、桃花，利读书考试，感情缘分好。', color: '#2ecc71' },
-  5: { name: '五黄土星', element: '土', luck: '大凶', short: '五黄', desc: '煞星，主破财、病灾、是非，此年需谨慎行事，化煞为要。', color: '#e74c3c' },
-  6: { name: '六白金星', element: '金', luck: '吉', short: '六白', desc: '主权贵、偏财、武运，利升迁、投资，事业有贵人相助。', color: '#bdc3c7' },
-  7: { name: '七赤金星', element: '金', luck: '凶', short: '七赤', desc: '主口舌、刀伤、破财，需防欺骗与盗窃，谨慎言辞。', color: '#e67e22' },
-  8: { name: '八白土星', element: '土', luck: '大吉', short: '八白', desc: '当运吉星，主财富、置业、子嗣，诸事顺遂，大吉大利。', color: '#d4a017' },
-  9: { name: '九紫火星', element: '火', luck: '吉', short: '九紫', desc: '主喜庆、声名、桃花，利婚姻、名声，逢节庆大事俱旺。', color: '#9b59b6' }
+(function(){const c=document.getElementById('star-canvas'),ctx=c.getContext('2d');let stars=[];function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}function init(){resize();stars=Array.from({length:80},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1+0.2,a:Math.random(),speed:Math.random()*0.003+0.001}));}function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.a+=s.speed;if(s.a>1)s.a=0;const alpha=Math.abs(Math.sin(s.a*Math.PI));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(180,160,255,${alpha*0.5})`;ctx.fill();});requestAnimationFrame(draw);}window.addEventListener('resize',init);init();draw();})();
+
+const LIFE_NUMBERS = {
+  1:{title:'领袖先锋',desc:'天生的领导者，独立自主，勇于开创，善于独当一面。你的使命是引领他人，走在时代前沿。'},
+  2:{title:'和谐使者',desc:'极具同理心，善于合作与调解，感情细腻，是天生的外交官。你的使命是带来和谐与平衡。'},
+  3:{title:'创意表达',desc:'才华横溢，创意无限，表达能力出众，天生的艺术家与沟通者。你的使命是传递美与喜悦。'},
+  4:{title:'稳固基石',desc:'踏实勤劳，做事有条不紊，是值得信赖的基石。你的使命是通过努力构建稳固的基础。'},
+  5:{title:'自由探索',desc:'热爱自由与变化，好奇心旺盛，适应力强，天生的冒险家。你的使命是探索世界，拥抱变化。'},
+  6:{title:'爱与责任',desc:'责任感强，充满爱心，天生的照顾者与保护者。你的使命是以爱滋养家庭与社区。'},
+  7:{title:'智慧探求',desc:'思维深邃，喜欢独处与钻研，直觉强烈，是天生的哲学家与研究者。你的使命是追求真理。'},
+  8:{title:'权威财富',desc:'具有强烈的事业心与商业头脑，能够积累财富与权威。你的使命是展示物质世界的丰盛。'},
+  9:{title:'宇宙智慧',desc:'博爱宽怀，富有远见，具有强烈的使命感。你的使命是超越小我，服务众生，传承智慧。'}
 };
 
-// 九宫方位（洛书排列）坐标 [行, 列]
-const JG_POS = {
-  4:[0,0], 9:[0,1], 2:[0,2],
-  3:[1,0], 5:[1,1], 7:[1,2],
-  8:[2,0], 1:[2,1], 6:[2,2]
-};
-const JG_DIR = {
-  4:'东南', 9:'南', 2:'西南',
-  3:'东',   5:'中', 7:'西',
-  8:'东北', 1:'北', 6:'西北'
-};
+const NINE_PALACE = [
+  {pos:'东南',num:4,name:'四绿文昌',type:'文昌',fortune:'学业'},
+  {pos:'正南',num:9,name:'九紫右弼',type:'吉',fortune:'声名'},
+  {pos:'西南',num:2,name:'二黑病符',type:'病',fortune:'健康'},
+  {pos:'正东',num:3,name:'三碧蚩尤',type:'凶',fortune:'口舌'},
+  {pos:'中宫',num:5,name:'五黄廉贞',type:'凶',fortune:'化解'},
+  {pos:'正西',num:7,name:'七赤破军',type:'凶',fortune:'防盗'},
+  {pos:'东北',num:8,name:'八白左辅',type:'吉',fortune:'财富'},
+  {pos:'正北',num:1,name:'一白贪狼',type:'吉',fortune:'事业'},
+  {pos:'西北',num:6,name:'六白武曲',type:'吉',fortune:'贵人'}
+];
 
-// 本命宫计算（男女不同）
-function getMinggong(year, gender) {
-  const sum = String(year).split('').reduce((a,b)=>a+parseInt(b),0);
-  const s2 = sum > 9 ? String(sum).split('').reduce((a,b)=>a+parseInt(b),0) : sum;
-  if (gender === '男') {
-    const v = (11 - s2) % 9;
-    return v === 0 ? 9 : v;
-  } else {
-    const v = (s2 + 4) % 9;
-    return v === 0 ? 9 : v;
+function digitSum(n) {
+  while (n > 9) {
+    n = String(n).split('').reduce((a,b)=>a+parseInt(b),0);
   }
+  return n;
 }
 
-// 流年飞星中宫（简化：每年中宫星）
-function getYearStar(year) {
-  const diff = year - 2024;
-  // 2024年中宫为六白
-  let v = ((6 - diff - 1) % 9 + 9) % 9 + 1;
-  return v;
-}
+function calcDestinyNumber() {
+  const dateStr = document.getElementById('birth-date').value;
+  if (!dateStr) return;
+  const digits = dateStr.replace(/-/g,'').split('').map(Number);
+  const sum = digits.reduce((a,b)=>a+b,0);
+  const lifeNum = digitSum(sum);
 
-// 飞星排布
-function flyStars(centerStar) {
-  const base = [4,9,2,3,5,7,8,1,6]; // 洛书顺序（按格）
-  const offset = centerStar - 5;
-  return base.map(n => {
-    let v = ((n + offset - 1) % 9 + 9) % 9 + 1;
-    return v;
-  });
-}
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('life-num').textContent = lifeNum;
+  const info = LIFE_NUMBERS[lifeNum] || LIFE_NUMBERS[9];
+  document.getElementById('life-title').textContent = info.title;
+  document.getElementById('life-desc').textContent = info.desc;
 
-function calcJiugong() {
-  const year = parseInt(document.getElementById('jgYear').value);
-  const gender = document.getElementById('jgGender').value;
-  let qYear = parseInt(document.getElementById('jgQueryYear').value);
-  if (!year || isNaN(year)) { alert('请输入出生年份'); return; }
-  if (!qYear || isNaN(qYear)) qYear = new Date().getFullYear();
+  // Nine palace — arrange in order: NW N NE / W C E / SW S SE
+  const order = [6,1,8, 7,5,3, 2,9,4]; // palace nums in grid order
+  const palaces = order.map(n => NINE_PALACE.find(p=>p.num===n));
+  const typeColors = {吉:'#c9a84c',文昌:'#81c784',凶:'#ef9a9a',病:'#ef9a9a'};
+  document.getElementById('nine-grid').innerHTML = palaces.map((p,i) =>
+    `<div class="palace-cell${i===4?' center':''}">
+      <div class="palace-num" style="color:${typeColors[p.type]||'var(--gold-lt)'};">${p.num}</div>
+      <div class="palace-dir">${p.pos}</div>
+      <div class="palace-star" style="color:${typeColors[p.type]||'var(--text3)'};">${p.type}</div>
+    </div>`
+  ).join('');
 
-  const minggong = getMinggong(year, gender);
-  const yearCenter = getYearStar(qYear);
-  const flied = flyStars(yearCenter);
-
-  // 九宫格布局（3x3，按洛书方位）
-  // 位置顺序：东南、南、西南、东、中、西、东北、北、西北
-  const positions = [4,9,2,3,5,7,8,1,6];
-  const grid = document.getElementById('jgGrid');
-  grid.innerHTML = '';
-  positions.forEach((baseNum, idx) => {
-    const flyNum = flied[idx];
-    const star = NINE_STARS[flyNum];
-    const isCenter = baseNum === 5;
-    const isMinggong = baseNum === minggong;
-    const div = document.createElement('div');
-    div.className = 'jiugong-cell' + (isCenter?' center':'');
-    if (isMinggong) div.style.border = '2px solid var(--gold)';
-    div.innerHTML = `
-      <div class="palace-name">${JG_DIR[baseNum]}</div>
-      <div class="cell-num" style="color:${star.color}">${flyNum}</div>
-      <div class="cell-star">${star.short}</div>
-      ${isMinggong?'<div style="font-size:9px;color:var(--gold);">本命</div>':''}
-    `;
-    grid.appendChild(div);
-  });
-
-  // 本命宫解析
-  const mingStar = NINE_STARS[minggong];
-  document.getElementById('jgBasePanel').innerHTML = `
-    <div class="result-row"><span class="result-key">本命宫</span><span class="result-val" style="color:${mingStar.color}">${mingStar.name}</span></div>
-    <div class="result-row"><span class="result-key">五行</span><span class="result-val">${mingStar.element}</span></div>
-    <div class="result-row"><span class="result-key">本命方位</span><span class="result-val">${JG_DIR[minggong]}</span></div>
-    <div class="result-row"><span class="result-key">先天运势</span><span class="result-val ${mingStar.luck==='大吉'||mingStar.luck==='吉'?'good':'bad'}">${mingStar.luck}</span></div>
-    <div style="margin-top:10px;font-size:13px;color:var(--text-muted);line-height:1.7;">${mingStar.desc}</div>
-  `;
-
-  // 流年：找本命宫在流年飞布中的位置
-  const mingIdx = positions.indexOf(minggong);
-  const flyInMing = flied[mingIdx];
-  const flyStar = NINE_STARS[flyInMing];
-  const centerStar = NINE_STARS[yearCenter];
-
-  document.getElementById('jgStarDesc').innerHTML = `
-    <div class="star-item">
-      <div class="star-header">
-        <span class="star-name">${qYear}年流年中宫：${centerStar.name}</span>
-        <span class="tag tag-${centerStar.luck==='大吉'||centerStar.luck==='吉'?'ji':centerStar.luck==='凶'||centerStar.luck==='大凶'?'xiong':'ping'}">${centerStar.luck}</span>
+  // Sub numbers
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const subNums = [
+    {label:'出生月份数', num:digitSum(m), desc:'反映你的情感模式与内在需求'},
+    {label:'出生日期数', num:digitSum(d), desc:'揭示你的个性特质与表达方式'},
+    {label:'出生年份数', num:digitSum(y), desc:'代表你的人生背景与成长课题'}
+  ];
+  document.getElementById('sub-nums').innerHTML = subNums.map(s =>
+    `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC',serif;font-size:20px;color:var(--gold-lt);">${s.num}</div>
+      <div>
+        <div style="font-size:13px;color:var(--text);">${s.label}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">${s.desc}</div>
       </div>
-      <div class="star-body">${centerStar.desc}</div>
-    </div>
-    <div class="star-item">
-      <div class="star-header">
-        <span class="star-name">本命宫飞入：${flyStar.name}</span>
-        <span class="tag tag-${flyStar.luck==='大吉'||flyStar.luck==='吉'?'ji':flyStar.luck==='凶'||flyStar.luck==='大凶'?'xiong':'ping'}">${flyStar.luck}</span>
-      </div>
-      <div class="star-body">
-        ${qYear}年，您的本命宫（${JG_DIR[minggong]}）飞入${flyStar.name}。<br>
-        ${flyStar.desc}
-      </div>
-    </div>
-  `;
-
-  document.getElementById('jgResult').style.display = 'block';
-  document.getElementById('jgResult').scrollIntoView({ behavior: 'smooth' });
+    </div>`
+  ).join('');
 }
 
-// 默认填入当前年份
-document.getElementById('jgQueryYear').value = new Date().getFullYear();
+// Auto-load
+const saved = localStorage.getItem('destinyBirth');
+if (saved) {
+  const d = JSON.parse(saved);
+  document.getElementById('birth-date').value = d.date;
+  calcDestinyNumber();
+}
 </script>
 </body>
 </html>

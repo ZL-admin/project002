@@ -1,221 +1,149 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>易经风水 · 命理玄学</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .today-bar {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(139,69,19,0.3);
-      border-radius: 10px;
-      margin: 12px 16px 4px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
-    }
-    .today-date { color: var(--text-muted); }
-    .today-luck { color: var(--gold); font-size: 12px; }
-    .today-wx { font-size: 20px; }
-    .notice-strip {
-      margin: 0 16px 8px;
-      padding: 8px 12px;
-      background: linear-gradient(90deg, rgba(192,57,43,0.15), rgba(212,160,23,0.1));
-      border-left: 3px solid var(--red-primary);
-      border-radius: 0 6px 6px 0;
-      font-size: 12px;
-      color: var(--text-muted);
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    .marquee { display: inline-block; animation: scroll-left 18s linear infinite; }
-    @keyframes scroll-left { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>天机命理</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="page-wrapper">
+<canvas id="star-canvas"></canvas>
 
-  <!-- Banner -->
-  <div class="banner">
-    <div class="banner-title">☯ 易经风水命理</div>
-    <div class="banner-subtitle">洞察天机 · 指引人生</div>
-    <div class="banner-deco">
-      <span></span><em>✦</em><span></span>
-    </div>
+<div class="topbar">
+  <div>
+    <div class="topbar-title">✦ 天机命理</div>
+    <div class="topbar-sub" id="top-date">加载中…</div>
   </div>
-
-  <!-- 今日信息 -->
-  <div class="today-bar">
-    <div>
-      <div class="today-date" id="todayDate">——</div>
-      <div class="today-luck" id="todayLuck">今日运势：加载中...</div>
-    </div>
-    <div class="today-wx" id="todayWx">☯</div>
-  </div>
-
-  <!-- 滚动通知 -->
-  <div class="notice-strip">
-    <span class="marquee">✨ 命理仅供参考，贵在自知自悟。积善之家，必有余庆。信则有，不信则无。祝您诸事顺遂，万事如意！</span>
-  </div>
-
-  <!-- 主入口（2列大按钮）-->
-  <div class="section-title">命理精算</div>
-  <div class="main-entry">
-    <a href="bazi.html" class="entry-card">
-      <div class="icon">🔮</div>
-      <div class="label">八字算命</div>
-      <div class="desc">天干地支 · 旺衰喜忌</div>
-    </a>
-    <a href="daily.html" class="entry-card">
-      <div class="icon">🎋</div>
-      <div class="label">每日一签</div>
-      <div class="desc">易经六十四卦 · 每日指引</div>
-    </a>
-    <a href="jiugong.html" class="entry-card">
-      <div class="icon">🧿</div>
-      <div class="label">九宫算命</div>
-      <div class="desc">九星飞泊 · 流年运势</div>
-    </a>
-    <a href="fengshui.html" class="entry-card">
-      <div class="icon">🧭</div>
-      <div class="label">风水罗盘</div>
-      <div class="desc">方位旺衰 · 布局指南</div>
-    </a>
-  </div>
-
-  <!-- 图标宫格（4列）-->
-  <div class="section-title">玄学工具</div>
-  <div class="icon-grid">
-    <a href="dream.html" class="grid-item">
-      <div class="g-icon">💤</div>
-      <div class="g-label">周公解梦</div>
-    </a>
-    <a href="wish.html" class="grid-item">
-      <div class="g-icon">🏮</div>
-      <div class="g-label">许愿灯</div>
-    </a>
-    <a href="daily.html" class="grid-item">
-      <div class="g-icon">📿</div>
-      <div class="g-label">抽签求卦</div>
-    </a>
-    <a href="bazi.html" class="grid-item">
-      <div class="g-icon">⚡</div>
-      <div class="g-label">五行分析</div>
-    </a>
-    <a href="jiugong.html" class="grid-item">
-      <div class="g-icon">🌟</div>
-      <div class="g-label">流年运势</div>
-    </a>
-    <a href="fengshui.html" class="grid-item">
-      <div class="g-icon">☯</div>
-      <div class="g-label">太极风水</div>
-    </a>
-    <a href="dream.html" class="grid-item">
-      <div class="g-icon">🌙</div>
-      <div class="g-label">梦境解析</div>
-    </a>
-    <a href="wish.html" class="grid-item">
-      <div class="g-icon">✨</div>
-      <div class="g-label">祈福许愿</div>
-    </a>
-  </div>
-
-  <!-- 今日卦象 -->
-  <div class="section-title">今日卦象</div>
-  <div class="card">
-    <div class="hexagram-display" id="todayHexagram">
-      <div class="hexagram-symbol">☯</div>
-      <div class="hexagram-name">加载中...</div>
-    </div>
-  </div>
-
-  <!-- 万年历 -->
-  <div class="section-title">万年历</div>
-  <div class="card">
-    <div id="calendarInfo" style="font-size:13px; color:var(--text-muted); line-height:2;">
-      加载中...
-    </div>
-  </div>
-
-  <div class="safe-bottom"></div>
+  <div id="top-zodiac" style="font-size:22px;"></div>
 </div>
 
-<!-- 底部导航 -->
+<div class="page">
+  <div style="height:16px;"></div>
+  <div class="day-banner fade-in" id="day-banner">
+    <div class="day-label" id="day-label">—</div>
+    <div class="day-sub" id="day-lunar">—</div>
+  </div>
+
+  <div class="card fade-in-2" style="margin-bottom:12px;">
+    <div class="section-title">今日运势</div>
+    <div class="score-grid" id="score-grid"></div>
+  </div>
+
+  <div class="card fade-in-3" style="margin-bottom:12px;">
+    <div class="section-title">今日宜忌</div>
+    <div style="display:flex;gap:6px;margin-bottom:6px;"><span class="tag tag-green">宜</span></div>
+    <div class="yiji-row" id="yi-row"></div>
+    <div class="gold-divider"></div>
+    <div style="display:flex;gap:6px;margin-bottom:6px;"><span class="tag tag-red">忌</span></div>
+    <div class="yiji-row" id="ji-row"></div>
+  </div>
+
+  <div class="card fade-in-4" style="margin-bottom:12px;">
+    <div class="section-title">穿衣指南</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div>
+        <div style="font-size:15px;color:var(--text);font-weight:600;" id="cloth-theme">—</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="cloth-avoid"></div>
+      </div>
+      <div class="clothing-colors" id="cloth-colors" style="margin-left:auto;"></div>
+    </div>
+    <div class="clothing-items mt8" id="cloth-items"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+    <a href="sign.html" class="card card-gold" style="text-decoration:none;text-align:center;padding:18px 12px;">
+      <div style="font-size:28px;margin-bottom:6px;">🔮</div>
+      <div style="font-family:'Noto Serif SC',serif;font-size:15px;color:var(--gold-lt);">今日签</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">今天该冲还是等？</div>
+    </a>
+    <a href="destiny.html" class="card" style="text-decoration:none;text-align:center;padding:18px 12px;">
+      <div style="font-size:28px;margin-bottom:6px;">☯️</div>
+      <div style="font-family:'Noto Serif SC',serif;font-size:15px;color:var(--text);">命运档案</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">你天生的性格密码</div>
+    </a>
+  </div>
+
+  <div class="card fade-in-4" style="margin-bottom:12px;">
+    <div class="section-title">更多探索</div>
+    <div class="feature-grid">
+      <a href="yuanfen.html" class="feature-item"><span class="feature-icon">💑</span><span>缘分测算</span></a>
+      <a href="dream.html"   class="feature-item"><span class="feature-icon">🌙</span><span>昨夜的梦</span></a>
+      <a href="jiugong.html" class="feature-item"><span class="feature-icon">🔢</span><span>数字命运</span></a>
+      <a href="fengshui.html"class="feature-item"><span class="feature-icon">🧿</span><span>能量空间</span></a>
+      <a href="wish.html"    class="feature-item"><span class="feature-icon">🏮</span><span>星愿</span></a>
+      <a href="sign.html"    class="feature-item"><span class="feature-icon">📿</span><span>今日签</span></a>
+      <a href="destiny.html" class="feature-item"><span class="feature-icon">🌌</span><span>命运档案</span></a>
+      <a href="yuanfen.html" class="feature-item"><span class="feature-icon">✨</span><span>契合度</span></a>
+    </div>
+  </div>
+
+  <div class="card fade-in-4" style="margin-bottom:16px;">
+    <div class="section-title">今日卦象</div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div class="hex-lines" id="hex-lines"></div>
+      <div>
+        <div style="font-family:'Noto Serif SC',serif;font-size:20px;color:var(--gold-lt);" id="hex-name">—</div>
+        <div style="font-size:12px;color:var(--gold);margin:4px 0;" id="hex-fortune">—</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.6;" id="hex-brief">—</div>
+      </div>
+    </div>
+    <a href="sign.html" style="display:block;text-align:right;margin-top:10px;font-size:12px;color:var(--gold);text-decoration:none;">查看详解 →</a>
+  </div>
+</div>
+
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item active">
-    <span class="nav-icon">🏠</span>
-    <span class="nav-text">首页</span>
-  </a>
-  <a href="bazi.html" class="nav-item">
-    <span class="nav-icon">🔮</span>
-    <span class="nav-text">八字</span>
-  </a>
-  <a href="daily.html" class="nav-item">
-    <span class="nav-icon">🎋</span>
-    <span class="nav-text">每日签</span>
-  </a>
-  <a href="dream.html" class="nav-item">
-    <span class="nav-icon">💤</span>
-    <span class="nav-text">解梦</span>
-  </a>
-  <a href="fengshui.html" class="nav-item">
-    <span class="nav-icon">☯</span>
-    <span class="nav-text">风水</span>
-  </a>
+  <a href="index.html"   class="nav-item active"><span class="nav-icon">🏠</span>首页</a>
+  <a href="destiny.html" class="nav-item"><span class="nav-icon">☯️</span>命运</a>
+  <a href="sign.html"    class="nav-item"><span class="nav-icon">🔮</span>今日签</a>
+  <a href="yuanfen.html" class="nav-item"><span class="nav-icon">💑</span>缘分</a>
+  <a href="dream.html"   class="nav-item"><span class="nav-icon">🌙</span>解梦</a>
 </nav>
 
+<script src="js/daily.js"></script>
 <script src="js/hexagram.js"></script>
 <script>
-  // 今日日期
-  const now = new Date();
-  const y = now.getFullYear(), m = now.getMonth()+1, d = now.getDate();
-  const week = ['日','一','二','三','四','五','六'][now.getDay()];
-  document.getElementById('todayDate').textContent = `${y}年${m}月${d}日 星期${week}`;
+(function(){
+  const c=document.getElementById('star-canvas'),ctx=c.getContext('2d');let stars=[];
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
+  function init(){resize();stars=Array.from({length:120},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.2+0.2,a:Math.random(),speed:Math.random()*0.003+0.001}));}
+  function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.a+=s.speed;if(s.a>1)s.a=0;const alpha=Math.abs(Math.sin(s.a*Math.PI));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,220,${alpha*0.7})`;ctx.fill();});requestAnimationFrame(draw);}
+  window.addEventListener('resize',init);init();draw();
+})();
 
-  // 天干地支年份
-  const TG = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-  const DZ = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-  const animals = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
-  const yearTg = TG[(y-4)%10], yearDz = DZ[(y-4)%12];
-  const animal = animals[(y-4)%12];
+const today=new Date();
+const weekdays=['日','一','二','三','四','五','六'];
+document.getElementById('top-date').textContent=`${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日 周${weekdays[today.getDay()]}`;
+const zodiac=getZodiacEmoji(today);
+document.getElementById('top-zodiac').textContent=zodiac.emoji;
+document.getElementById('day-lunar').textContent=getLunarDisplay(today)+' · '+zodiac.sign;
 
-  // 今日运势（基于日期hash）
-  const dateKey = `${y}${m}${d}`;
-  let hash = 0;
-  for(let i=0;i<dateKey.length;i++) hash = (hash*31+dateKey.charCodeAt(i))>>>0;
-  const lucks = ['大吉','吉','小吉','中平','小凶'];
-  const luckIdx = hash % 5;
-  const luck = lucks[luckIdx];
-  const wxArr = ['木','火','土','金','水'];
-  const wx = wxArr[hash % 5];
-  const wxEmoji = {'木':'🌿','火':'🔥','土':'🌏','金':'⚡','水':'💧'}[wx];
+const scores=getFortuneScores(today);
+const dayInfo=getDayLabel(scores);
+document.getElementById('day-label').textContent='✨ 今天是你的'+dayInfo.text;
 
-  document.getElementById('todayLuck').textContent = `今日运势：${luck}`;
-  document.getElementById('todayWx').textContent = wxEmoji;
+const scoreItems=[{key:'career',emoji:'💼',label:'事业'},{key:'love',emoji:'💗',label:'爱情'},{key:'wealth',emoji:'💰',label:'财运'},{key:'health',emoji:'🌿',label:'健康'}];
+const scoreColors={career:'#c9a84c',love:'#f48fb1',wealth:'#81c784',health:'#4fc3f7'};
+document.getElementById('score-grid').innerHTML=scoreItems.map(item=>{
+  const val=scores[item.key];
+  const cls=val>=80?'score-great':val>=65?'score-good':val>=50?'score-mid':'score-low';
+  return `<div class="score-item ${cls}"><div class="score-emoji">${item.emoji}</div><div class="score-label">${item.label}</div><div class="score-value">${val}</div><div class="score-bar"><div class="score-bar-fill" style="width:${val}%;background:${scoreColors[item.key]};"></div></div></div>`;
+}).join('');
 
-  // 今日卦象
-  const hexagram = HEXAGRAM.getByDate(dateKey);
-  document.getElementById('todayHexagram').innerHTML = `
-    <div class="hexagram-symbol">${hexagram.symbol}</div>
-    <div class="hexagram-name">${hexagram.fullName}</div>
-    <div class="tag tag-${hexagram.luck==='大吉'?'ji':hexagram.luck==='凶'?'xiong':'ping'}" style="margin:8px 0;">${hexagram.luck}</div>
-    <div class="hexagram-judgment" style="padding:0 12px;">${hexagram.meaning}</div>
-    <a href="daily.html" style="display:inline-block;margin-top:12px;font-size:13px;color:var(--gold);text-decoration:none;">查看详解 →</a>
-  `;
+const yiji=getYiJi(today);
+document.getElementById('yi-row').innerHTML=yiji.yi.map(t=>`<div class="yiji-item"><span class="yi-dot"></span>${t}</div>`).join('');
+document.getElementById('ji-row').innerHTML=yiji.ji.map(t=>`<div class="yiji-item"><span class="ji-dot"></span>${t}</div>`).join('');
 
-  // 万年历信息
-  const monthDz = DZ[(m+1)%12];
-  document.getElementById('calendarInfo').innerHTML = `
-    <div class="result-row"><span class="result-key">农历年份</span><span class="result-val">${yearTg}${yearDz}年（${animal}年）</span></div>
-    <div class="result-row"><span class="result-key">今日干支</span><span class="result-val">${TG[(d+hash)%10]}${DZ[(d+hash)%12]}</span></div>
-    <div class="result-row"><span class="result-key">当月月令</span><span class="result-val">${monthDz}月</span></div>
-    <div class="result-row"><span class="result-key">今日五行</span><span class="result-val wx-${{'木':'wood','火':'fire','土':'earth','金':'metal','水':'water'}[wx]}">${wx}</span></div>
-    <div class="result-row"><span class="result-key">宜</span><span class="result-val good">祈福 · 出行 · 交友</span></div>
-    <div class="result-row"><span class="result-key">忌</span><span class="result-val bad">动土 · 争讼 · 冒险</span></div>
-  `;
+const cloth=getClothing(today);
+document.getElementById('cloth-theme').textContent='今日'+cloth.desc;
+document.getElementById('cloth-avoid').textContent='禁忌：'+cloth.avoid;
+document.getElementById('cloth-colors').innerHTML=cloth.lucky.map(c=>`<div class="color-swatch" style="background:${c};"></div>`).join('');
+document.getElementById('cloth-items').innerHTML=cloth.items.map(i=>`<span class="clothing-item">${i}</span>`).join('');
+
+const hex=getHexagramByDate(today);
+document.getElementById('hex-lines').innerHTML=drawHexagram(hex);
+document.getElementById('hex-name').textContent=hex.name+'卦';
+document.getElementById('hex-fortune').textContent='运势：'+hex.fortune;
+document.getElementById('hex-brief').textContent=hex.brief;
 </script>
 </body>
 </html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>命运档案 · 天机命理</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="star-canvas"></canvas>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">☯ 命运档案</div>
+    <div class="topbar-sub">你天生的性格密码和人生节奏</div>
+  </div>
+</div>
+
+<div class="page">
+  <div style="height:16px;"></div>
+
+  <!-- Input Form -->
+  <div class="card fade-in" id="form-card" style="margin-bottom:12px;">
+    <div class="section-title">输入出生信息</div>
+    <div class="form-group">
+      <label class="form-label">出生日期</label>
+      <input type="date" class="form-input" id="birth-date" value="1990-01-01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">出生时辰</label>
+      <select class="form-select" id="birth-hour">
+        <option value="23">子时 (23:00–01:00)</option>
+        <option value="1">丑时 (01:00–03:00)</option>
+        <option value="3">寅时 (03:00–05:00)</option>
+        <option value="5">卯时 (05:00–07:00)</option>
+        <option value="7">辰时 (07:00–09:00)</option>
+        <option value="9" selected>巳时 (09:00–11:00)</option>
+        <option value="11">午时 (11:00–13:00)</option>
+        <option value="13">未时 (13:00–15:00)</option>
+        <option value="15">申时 (15:00–17:00)</option>
+        <option value="17">酉时 (17:00–19:00)</option>
+        <option value="19">戌时 (19:00–21:00)</option>
+        <option value="21">亥时 (21:00–23:00)</option>
+      </select>
+    </div>
+    <button class="btn btn-gold btn-full" onclick="calcAndShow()">✦ 生成命运档案</button>
+  </div>
+
+  <!-- Result (hidden initially) -->
+  <div id="result" style="display:none;">
+
+    <!-- Four Pillars -->
+    <div class="card fade-in" style="margin-bottom:12px;">
+      <div class="section-title">四柱八字</div>
+      <div class="pillar-grid" id="pillars"></div>
+    </div>
+
+    <!-- Five Elements -->
+    <div class="card fade-in-2" style="margin-bottom:12px;">
+      <div class="section-title">五行分析</div>
+      <div class="elem-bars" id="elem-bars"></div>
+    </div>
+
+    <!-- Day Master -->
+    <div class="card fade-in-3" style="margin-bottom:12px;">
+      <div class="section-title">日主分析</div>
+      <div id="day-master-info"></div>
+    </div>
+
+    <!-- Luck Cycles -->
+    <div class="card fade-in-4" style="margin-bottom:12px;">
+      <div class="section-title">大运流年</div>
+      <div class="luck-row" id="luck-row"></div>
+    </div>
+
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html"   class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+  <a href="destiny.html" class="nav-item active"><span class="nav-icon">☯️</span>命运</a>
+  <a href="sign.html"    class="nav-item"><span class="nav-icon">🔮</span>今日签</a>
+  <a href="yuanfen.html" class="nav-item"><span class="nav-icon">💑</span>缘分</a>
+  <a href="dream.html"   class="nav-item"><span class="nav-icon">🌙</span>解梦</a>
+</nav>
+
+<script src="js/daily.js"></script>
+<script src="js/bazi.js"></script>
+<script>
+(function(){const c=document.getElementById('star-canvas'),ctx=c.getContext('2d');let stars=[];function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}function init(){resize();stars=Array.from({length:100},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1+0.2,a:Math.random(),speed:Math.random()*0.003+0.001}));}function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.a+=s.speed;if(s.a>1)s.a=0;const alpha=Math.abs(Math.sin(s.a*Math.PI));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,220,${alpha*0.6})`;ctx.fill();});requestAnimationFrame(draw);}window.addEventListener('resize',init);init();draw();})();
+
+// Restore saved
+const saved = localStorage.getItem('destinyBirth');
+if (saved) {
+  const d = JSON.parse(saved);
+  document.getElementById('birth-date').value = d.date;
+  document.getElementById('birth-hour').value = d.hour;
+  calcAndShow();
+}
+
+function calcAndShow() {
+  const dateStr = document.getElementById('birth-date').value;
+  const hour = parseInt(document.getElementById('birth-hour').value);
+  if (!dateStr) return;
+  const parts = dateStr.split('-');
+  const y = parseInt(parts[0]), m = parseInt(parts[1]), d = parseInt(parts[2]);
+  localStorage.setItem('destinyBirth', JSON.stringify({date:dateStr, hour}));
+
+  const bazi = calcBazi(y, m, d, hour);
+  document.getElementById('result').style.display = 'block';
+
+  // Pillars
+  const elemColors = ELEM_COLOR;
+  document.getElementById('pillars').innerHTML = bazi.pillars.map((p,i) => {
+    const se = STEM_ELEM[STEMS.indexOf(p.stem)];
+    const be = BRANCH_ELEM[BRANCHES.indexOf(p.branch)];
+    return `<div class="pillar-item">
+      <div class="pillar-label">${bazi.labels[i]}</div>
+      <div class="pillar-stem">${p.stem}</div>
+      <div class="pillar-branch">${p.branch}</div>
+      <div class="pillar-elem" style="background:${elemColors[se]}22;color:${elemColors[se]};">${se}</div>
+    </div>`;
+  }).join('');
+
+  // Elements
+  const elemOrder = ['木','火','土','金','水'];
+  const maxCount = Math.max(...Object.values(bazi.elemCount));
+  document.getElementById('elem-bars').innerHTML = elemOrder.map(el => {
+    const cnt = bazi.elemCount[el];
+    const pct = maxCount > 0 ? (cnt/maxCount)*100 : 0;
+    return `<div class="elem-bar-row">
+      <div class="elem-name" style="color:${ELEM_COLOR[el]};">${el}</div>
+      <div class="elem-track"><div class="elem-fill" style="width:${pct}%;background:${ELEM_COLOR[el]};"></div></div>
+      <div class="elem-count">${cnt}</div>
+    </div>`;
+  }).join('');
+
+  // Day master
+  const personality = getPersonality(bazi.dayElem, bazi.strong);
+  const luckyColor = bazi.luckyElems.map(e => `<span class="tag" style="margin-right:4px;">${e}</span>`).join('');
+  const unluckyColor = bazi.unluckyElems.map(e => `<span class="tag tag-red" style="margin-right:4px;">${e}</span>`).join('');
+  document.getElementById('day-master-info').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:${ELEM_COLOR[bazi.dayElem]}22;border:2px solid ${ELEM_COLOR[bazi.dayElem]};display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC',serif;font-size:22px;color:${ELEM_COLOR[bazi.dayElem]};">${bazi.dayElem}</div>
+      <div>
+        <div style="font-size:16px;font-weight:600;color:var(--text);">${bazi.dayElem}日主 · ${bazi.strong?'身强':'身弱'}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">${bazi.dayYin?'阴':'阳'}${bazi.dayElem}</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px;">${personality}</div>
+    <div style="margin-bottom:8px;"><span style="font-size:12px;color:var(--text3);">喜用神：</span>${luckyColor}</div>
+    <div><span style="font-size:12px;color:var(--text3);">忌讳：</span>${unluckyColor}</div>
+  `;
+
+  // Luck cycles
+  document.getElementById('luck-row').innerHTML = bazi.luckCycles.map(lc =>
+    `<div class="luck-item">
+      <div class="luck-age">${lc.startAge}岁~</div>
+      <div class="luck-pillar">${lc.stem}<br>${lc.branch}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px;">${lc.stemElem}</div>
+    </div>`
+  ).join('');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>今日签 · 天机命理</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.hint { font-size:13px; color:var(--text3); text-align:center; margin-bottom:20px; }
+.redraw-btn { display:block; margin:20px auto 0; width:fit-content; }
+.fortune-badge {
+  display:inline-block; padding:4px 16px; border-radius:20px;
+  font-size:13px; font-weight:600; margin-bottom:12px;
+}
+.fortune-大吉 { background:rgba(201,168,76,0.2); color:var(--gold-lt); border:1px solid var(--border2); }
+.fortune-吉 { background:rgba(130,200,130,0.2); color:#a5d6a7; border:1px solid rgba(130,200,130,0.3); }
+.fortune-中 { background:rgba(100,150,255,0.2); color:#90caf9; border:1px solid rgba(100,150,255,0.3); }
+.fortune-凶 { background:rgba(229,57,53,0.2); color:#ef9a9a; border:1px solid rgba(229,57,53,0.3); }
+</style>
+</head>
+<body>
+<canvas id="star-canvas"></canvas>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">🔮 今日签</div>
+    <div class="topbar-sub">今天该冲还是等？</div>
+  </div>
+</div>
+
+<div class="page">
+  <div style="height:20px;"></div>
+  <p class="hint fade-in">点击卡片揭示今日签象</p>
+
+  <div class="sign-wrapper fade-in-2">
+    <div class="sign-card-flip" id="sign-card" onclick="flipCard()">
+      <div class="sign-face">
+        <div class="sign-front-icon">✦</div>
+        <div style="font-family:'Noto Serif SC',serif;font-size:18px;color:var(--gold);">点击翻牌</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:8px;">天意已定，静候揭晓</div>
+      </div>
+      <div class="sign-back" id="sign-back">
+        <div id="sign-name" class="sign-name">—</div>
+        <div id="sign-fortune-badge"></div>
+        <div id="sign-brief" class="sign-brief">—</div>
+        <div class="gold-divider" style="width:80%;margin:12px auto;"></div>
+        <div id="sign-desc" class="sign-desc">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sign-detail" style="display:none;margin-top:20px;">
+    <div class="card fade-in" style="margin-bottom:12px;" id="sign-detail-card"></div>
+    <button class="btn btn-outline redraw-btn" onclick="redraw()">🎴 明日另请高明</button>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html"   class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+  <a href="destiny.html" class="nav-item"><span class="nav-icon">☯️</span>命运</a>
+  <a href="sign.html"    class="nav-item active"><span class="nav-icon">🔮</span>今日签</a>
+  <a href="yuanfen.html" class="nav-item"><span class="nav-icon">💑</span>缘分</a>
+  <a href="dream.html"   class="nav-item"><span class="nav-icon">🌙</span>解梦</a>
+</nav>
+
+<script src="js/hexagram.js"></script>
+<script>
+(function(){const c=document.getElementById('star-canvas'),ctx=c.getContext('2d');let stars=[];function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}function init(){resize();stars=Array.from({length:100},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.2+0.2,a:Math.random(),speed:Math.random()*0.003+0.001}));}function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.a+=s.speed;if(s.a>1)s.a=0;const alpha=Math.abs(Math.sin(s.a*Math.PI));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,220,${alpha*0.7})`;ctx.fill();});requestAnimationFrame(draw);}window.addEventListener('resize',init);init();draw();})();
+
+let flipped = false;
+const today = new Date();
+const hex = getHexagramByDate(today);
+
+function flipCard() {
+  if (flipped) return;
+  flipped = true;
+  // Fill back
+  document.getElementById('sign-name').textContent = hex.name + '卦';
+  document.getElementById('sign-fortune-badge').innerHTML =
+    `<div class="fortune-badge fortune-${hex.fortune}">${hex.fortune}</div>`;
+  document.getElementById('sign-brief').textContent = hex.brief;
+  document.getElementById('sign-desc').textContent = hex.desc;
+  document.getElementById('sign-card').classList.add('flipped');
+  setTimeout(() => {
+    document.getElementById('sign-detail').style.display = 'block';
+    document.getElementById('sign-detail-card').innerHTML = `
+      <div class="section-title">卦象解析</div>
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
+        <div class="hex-lines">${drawHexagram(hex)}</div>
+        <div>
+          <div style="font-family:'Noto Serif SC',serif;font-size:18px;color:var(--gold-lt);margin-bottom:6px;">${hex.name}卦 第${hex.id}卦</div>
+          <div style="font-size:12px;color:var(--text3);">上卦：${hex.upper} · 下卦：${hex.lower}</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8;">${hex.desc}</div>
+      <div class="gold-divider"></div>
+      <div style="font-size:12px;color:var(--text3);">卦辞：${hex.brief}</div>
+    `;
+  }, 600);
+}
+
+function redraw() {
+  // Tomorrow sign preview (manual draw)
+  alert('明日新签将在明天自动揭晓，天意不可强求 ✦');
+}
+</script>
+</body>
+</html>
