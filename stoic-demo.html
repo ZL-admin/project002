@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>stoic. — Mental Health Journaling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F5F2EC;
+    --white: #FFFFFF;
+    --dark: #1C1C1E;
+    --dark2: #2C2C2E;
+    --dark3: #3A3A3C;
+    --morning: #D4913A;
+    --morning-bg: #FEF6EA;
+    --evening: #3A5A8C;
+    --evening-bg: #EBF0F7;
+    --green: #34A853;
+    --red: #EF5350;
+    --text: #1C1C1E;
+    --text2: #6B6B70;
+    --text3: #9B9BA0;
+    --border: rgba(0,0,0,0.08);
+    --shadow: 0 2px 16px rgba(0,0,0,0.06);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+  }
+
+  html, body {
+    height: 100%;
+    background: #E8E5DF;
+    font-family: 'Inter', -apple-system, 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  #app-shell {
+    max-width: 390px;
+    width: 100%;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--cream);
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.18);
+    overflow: hidden;
+  }
+
+  /* ─── Screen System ─── */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    padding-bottom: 80px;
+    animation: fadeIn 0.22s ease;
+  }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .screen-dark {
+    background: var(--dark);
+    color: #fff;
+  }
+
+  /* ─── Topbar ─── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    background: var(--cream);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar-dark {
+    background: var(--dark);
+  }
+  .topbar-brand {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar-date {
+    font-size: 12px;
+    color: var(--text2);
+    font-weight: 500;
+  }
+  .streak-badge {
+    background: linear-gradient(135deg, #FF6B35, #FF9A3C);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.2px;
+  }
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--morning);
+    padding: 4px 0;
+    font-family: inherit;
+  }
+  .back-btn-dark {
+    color: #8AB4E8;
+  }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .topbar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .topbar-title-dark { color: #fff; }
+
+  .topbar-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--morning);
+    font-family: inherit;
+    padding: 4px 0;
+  }
+
+  /* ─── Bottom Nav ─── */
+  #bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 390px;
+    background: rgba(245,242,236,0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0 14px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    gap: 3px;
+    font-family: inherit;
+    transition: opacity 0.15s;
+  }
+  .nav-item:active { opacity: 0.6; }
+  .nav-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text3);
+    letter-spacing: 0.2px;
+  }
+  .nav-item.active .nav-label { color: var(--morning); }
+  .nav-item.active .nav-icon { transform: scale(1.08); }
+
+  /* ─── Scroll Area ─── */
+  .scroll-area {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: calc(100vh - 60px);
+    padding-bottom: 20px;
+  }
+
+  /* ─── Cards ─── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card-dark {
+    background: var(--dark2);
+    border-radius: var(--radius);
+  }
+
+  /* ─── HOME SCREEN ─── */
+  .home-scroll { padding: 0 16px 16px; }
+
+  .quote-card {
+    background: var(--dark);
+    border-radius: var(--radius);
+    padding: 22px 20px 18px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s;
+  }
+  .quote-card:active { transform: scale(0.98); }
+  .quote-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(212,145,58,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .quote-source-chip {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.6);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .quote-text {
+    font-size: 16px;
+    line-height: 1.55;
+    color: #fff;
+    font-weight: 400;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+  .quote-author {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .quote-hint {
+    font-size: 12px;
+    color: var(--morning);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .reflection-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .reflection-card {
+    border-radius: var(--radius);
+    padding: 16px 14px 14px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .reflection-card:active { transform: scale(0.97); }
+  .reflection-card-morning {
+    background: var(--white);
+    border-top: 3px solid var(--morning);
+    box-shadow: var(--shadow);
+  }
+  .reflection-card-evening {
+    background: var(--dark);
+    color: #fff;
+  }
+  .rc-icon { font-size: 22px; margin-bottom: 6px; display: block; }
+  .rc-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .rc-sub { font-size: 11px; color: var(--text2); margin-bottom: 10px; }
+  .rc-sub-dark { color: rgba(255,255,255,0.5); }
+  .rc-action {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--morning);
+  }
+  .rc-done {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .mood-quick-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s;
+  }
+  .mood-quick-card:active { transform: scale(0.98); }
+  .mood-quick-left {}
+  .mood-quick-label { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .mood-quick-sub { font-size: 12px; color: var(--text2); }
+  .mood-quick-arrow { font-size: 20px; color: var(--text3); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    margin-top: 4px;
+  }
+  .section-title { font-size: 16px; font-weight: 700; color: var(--text); }
+  .section-link { font-size: 12px; color: var(--morning); font-weight: 500; cursor: pointer; }
+
+  .guided-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .guided-scroll::-webkit-scrollbar { display: none; }
+  .guided-mini-card {
+    min-width: 130px;
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 14px 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s;
+    flex-shrink: 0;
+  }
+  .guided-mini-card:active { transform: scale(0.96); }
+  .gmc-icon { font-size: 20px; margin-bottom: 6px; }
+  .gmc-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .gmc-tag { font-size: 10px; color: var(--text3); font-weight: 500; }
+
+  /* ─── PROGRESS DOTS ─── */
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0 0;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.2s;
+  }
+  .dot.active {
+    background: var(--morning);
+    width: 20px;
+    border-radius: 4px;
+  }
+
+  .dot-dark { background: rgba(255,255,255,0.2); }
+  .dot-dark.active { background: #8AB4E8; }
+
+  /* ─── WIZARD STEPS ─── */
+  .wizard-content {
+    padding: 20px 20px 0;
+  }
+  .step-div { display: none; }
+  .step-div.active { display: block; }
+
+  .step-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--morning);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .step-label-dark { color: #8AB4E8; }
+
+  .step-heading {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 18px;
+  }
+  .step-heading-dark { color: #fff; }
+
+  .amber-box {
+    background: var(--morning-bg);
+    border-left: 3px solid var(--morning);
+    border-radius: var(--radius-xs);
+    padding: 14px 14px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.55;
+    font-style: italic;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 6px;
+    margin-top: 14px;
+    display: block;
+  }
+  .field-label:first-of-type { margin-top: 0; }
+
+  input[type="text"], textarea {
+    width: 100%;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xs);
+    padding: 12px 14px;
+    font-size: 15px;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+    -webkit-appearance: none;
+  }
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--morning);
+  }
+
+  .input-dark {
+    background: var(--dark3);
+    border-color: rgba(255,255,255,0.1);
+    color: #fff;
+  }
+  .input-dark::placeholder { color: rgba(255,255,255,0.3); }
+  .input-dark:focus { border-color: #8AB4E8; }
+
+  .gratitude-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .gratitude-num {
+    width: 28px; height: 28px;
+    min-width: 28px;
+    background: var(--morning);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    margin-top: 10px;
+  }
+
+  /* ─── PRIORITY ITEMS ─── */
+  .priority-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .priority-num {
+    width: 28px; height: 28px;
+    min-width: 28px;
+    border: 2px solid var(--morning);
+    color: var(--morning);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+
+  .continue-btn {
+    width: 100%;
+    background: var(--morning);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.2px;
+  }
+  .continue-btn:active { opacity: 0.85; transform: scale(0.99); }
+
+  .continue-btn-dark {
+    background: #3A5A8C;
+  }
+  .continue-btn-dark:active { opacity: 0.85; }
+
+  /* ─── COMPLETION SCREENS ─── */
+  .completion-div {
+    display: none;
+    text-align: center;
+    padding: 60px 30px 40px;
+  }
+  .completion-div.active { display: block; }
+  .completion-icon { font-size: 60px; margin-bottom: 18px; }
+  .completion-title { font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .completion-title-dark { color: #fff; }
+  .completion-sub { font-size: 15px; color: var(--text2); margin-bottom: 6px; }
+  .completion-sub-dark { color: rgba(255,255,255,0.5); }
+  .completion-streak { font-size: 32px; font-weight: 700; color: var(--morning); margin: 12px 0 20px; }
+  .completion-msg { font-size: 14px; color: var(--text2); margin-bottom: 30px; font-style: italic; }
+  .completion-msg-dark { color: rgba(255,255,255,0.4); }
+  .home-return-btn {
+    background: var(--white);
+    border: 2px solid var(--morning);
+    color: var(--morning);
+    border-radius: var(--radius-sm);
+    padding: 14px 30px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .home-return-btn:active { background: var(--morning); color: #fff; }
+  .home-return-btn-dark {
+    background: transparent;
+    border-color: #8AB4E8;
+    color: #8AB4E8;
+  }
+
+  /* ─── MOOD SLIDER ─── */
+  .mood-score-display {
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .mood-score-num {
+    font-size: 64px;
+    font-weight: 700;
+    color: var(--morning);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .mood-score-num-dark { color: #8AB4E8; }
+  .mood-emoji { font-size: 36px; }
+  .mood-slider-wrap {
+    padding: 8px 0 10px;
+  }
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, var(--morning) 0%, var(--morning) 50%, rgba(255,255,255,0.15) 50%);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 26px; height: 26px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    cursor: pointer;
+    border: 2px solid var(--morning);
+  }
+  input[type="range"].dark-slider {
+    background: linear-gradient(to right, #8AB4E8 0%, #8AB4E8 50%, rgba(255,255,255,0.1) 50%);
+  }
+  input[type="range"].dark-slider::-webkit-slider-thumb {
+    background: var(--dark);
+    border-color: #8AB4E8;
+  }
+  .mood-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+  .mood-label { font-size: 11px; color: var(--text3); font-weight: 500; }
+  .mood-label-dark { color: rgba(255,255,255,0.35); }
+
+  /* ─── CHIP GRIDS ─── */
+  .chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .chip {
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.75);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .chip:active { transform: scale(0.96); }
+  .chip.selected {
+    background: #3A5A8C;
+    border-color: #8AB4E8;
+    color: #fff;
+  }
+
+  .chip-light {
+    background: var(--cream);
+    border-color: var(--border);
+    color: var(--text2);
+  }
+  .chip-light.selected {
+    background: var(--morning-bg);
+    border-color: var(--morning);
+    color: var(--morning);
+  }
+
+  /* ─── JOURNAL SCREEN ─── */
+  .journal-scroll { padding: 0 16px 16px; }
+
+  .free-write-btn {
+    width: 100%;
+    background: var(--dark);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: opacity 0.15s;
+  }
+  .free-write-btn:active { opacity: 0.8; }
+  .free-write-btn span { font-size: 18px; }
+
+  .filter-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-bottom: 14px;
+  }
+  .filter-chips::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    color: var(--text2);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+  }
+  .filter-chip.active {
+    background: var(--morning);
+    border-color: var(--morning);
+    color: #fff;
+  }
+
+  .template-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .template-card {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 14px 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s;
+  }
+  .template-card:active { transform: scale(0.96); }
+  .template-card[data-hidden="true"] { display: none; }
+  .tc-icon { font-size: 22px; margin-bottom: 6px; }
+  .tc-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 3px; line-height: 1.3; }
+  .tc-cat {
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 500;
+    background: var(--cream);
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+
+  .recent-entry {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+  .re-date { font-size: 11px; color: var(--text3); font-weight: 500; margin-bottom: 4px; }
+  .re-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .re-preview { font-size: 12px; color: var(--text2); line-height: 1.4; }
+
+  /* ─── JOURNAL WRITE ─── */
+  .journal-write-scroll { padding: 0 16px 16px; }
+
+  .jw-textarea {
+    width: 100%;
+    min-height: 340px;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+    resize: none;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s;
+  }
+  .jw-textarea:focus { border-color: var(--morning); }
+
+  .word-count-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 10px 2px;
+    font-size: 12px;
+    color: var(--text3);
+    font-weight: 500;
+  }
+
+  /* ─── MOOD CHECK-IN ─── */
+  .mood-checkin-scroll { padding: 16px 20px; }
+
+  .factor-chips-mood {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .save-mood-btn {
+    width: 100%;
+    background: var(--morning);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 24px;
+    transition: opacity 0.15s;
+  }
+  .save-mood-btn:active { opacity: 0.85; }
+
+  /* ─── TRENDS ─── */
+  .trends-scroll { padding: 0 16px 16px; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 16px 14px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .stat-num { font-size: 36px; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 11px; color: var(--text2); font-weight: 500; }
+  .stat-sub { font-size: 10px; color: var(--text3); font-weight: 400; margin-top: 2px; }
+
+  .chart-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+  .chart-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  canvas#moodChart { width: 100%; display: block; border-radius: 6px; }
+
+  .insight-card {
+    background: var(--morning-bg);
+    border-left: 3px solid var(--morning);
+    border-radius: var(--radius-xs);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .insight-title { font-size: 12px; font-weight: 700; color: var(--morning); margin-bottom: 6px; letter-spacing: 0.5px; }
+  .insight-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  .factors-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .factors-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .factor-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .factor-name { font-size: 12px; font-weight: 600; color: var(--text); min-width: 80px; }
+  .factor-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--cream);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .factor-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+  .factor-score { font-size: 11px; color: var(--text2); font-weight: 600; min-width: 28px; text-align: right; }
+
+  /* ─── BREATHE ─── */
+  .breathe-scroll { padding: 0 20px 16px; background: var(--dark); min-height: calc(100vh - 60px); }
+
+  .technique-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .technique-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.65);
+    border-radius: var(--radius-xs);
+    padding: 10px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    transition: all 0.18s;
+    line-height: 1.3;
+  }
+  .technique-btn.active {
+    background: rgba(58,90,140,0.5);
+    border-color: #8AB4E8;
+    color: #fff;
+  }
+  .technique-btn:active { opacity: 0.7; }
+
+  .breathe-circle-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .breathe-outer {
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    border: 2px solid rgba(138,180,232,0.2);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 3s ease-in-out;
+    position: relative;
+  }
+  .breathe-inner {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #4A7AB5, #2A4A7A);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(58,90,140,0.5);
+    transition: transform 3s ease-in-out;
+  }
+  .breathe-count {
+    font-size: 42px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .breathe-phase {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  .session-info {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 500;
+    margin-top: 14px;
+    text-align: center;
+  }
+
+  .breathe-start-btn {
+    width: 100%;
+    background: var(--morning);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 16px;
+    transition: opacity 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .breathe-start-btn:active { opacity: 0.85; }
+  .breathe-start-btn.stop-mode {
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.6);
+  }
+
+  .breathe-quote-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+  }
+  .bqc-text { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.55; font-style: italic; margin-bottom: 6px; }
+  .bqc-author { font-size: 11px; color: rgba(255,255,255,0.35); font-weight: 500; }
+
+  /* ─── TOPBAR DARK ─── */
+  .topbar-brand-dark { color: rgba(255,255,255,0.9); }
+  .topbar-date-dark { color: rgba(255,255,255,0.4); }
+
+  /* ─── HELPERS ─── */
+  .mt8 { margin-top: 8px; }
+  .mt12 { margin-top: 12px; }
+  .mt16 { margin-top: 16px; }
+  .mb12 { margin-bottom: 12px; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+  /* No entries placeholder */
+  .no-entries {
+    text-align: center;
+    padding: 20px;
+    color: var(--text3);
+    font-size: 13px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div id="app-shell">
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SCREEN 1: HOME                              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="s-home" class="screen active">
+    <div class="topbar">
+      <span class="topbar-brand">stoic.</span>
+      <div class="topbar-right">
+        <span class="topbar-date" id="home-date"></span>
+        <span class="streak-badge" id="home-streak">🔥 0 days</span>
+      </div>
+    </div>
+    <div class="home-scroll">
+      <!-- Quote Card -->
+      <div class="quote-card" onclick="showScreen('s-journal-write'); openFreeWrite();">
+        <div class="quote-source-chip">DAILY WISDOM</div>
+        <div class="quote-text" id="home-quote-text">"The impediment to action advances action. What stands in the way becomes the way."</div>
+        <div class="quote-author" id="home-quote-author">— Marcus Aurelius</div>
+        <div class="quote-hint">Tap for a journaling prompt →</div>
+      </div>
+
+      <!-- Reflection Cards -->
+      <div class="reflection-row">
+        <div class="reflection-card reflection-card-morning" onclick="handleMorningClick()">
+          <span class="rc-icon">☀️</span>
+          <div class="rc-title">Morning</div>
+          <div class="rc-sub">Prepare your day</div>
+          <div id="morning-action" class="rc-action">Start →</div>
+        </div>
+        <div class="reflection-card reflection-card-evening" onclick="handleEveningClick()">
+          <span class="rc-icon">🌙</span>
+          <div class="rc-title" style="color:#fff;">Evening</div>
+          <div class="rc-sub rc-sub-dark">Review your day</div>
+          <div id="evening-action" class="rc-action">Start →</div>
+        </div>
+      </div>
+
+      <!-- Mood Quick Card -->
+      <div class="mood-quick-card" onclick="showScreen('s-mood-checkin')">
+        <div class="mood-quick-left">
+          <div class="mood-quick-label">💭 Mood Check-in</div>
+          <div class="mood-quick-sub">How are you right now?</div>
+        </div>
+        <div class="mood-quick-arrow">›</div>
+      </div>
+
+      <!-- Guided Journals -->
+      <div class="section-header">
+        <span class="section-title">Guided Journals</span>
+        <span class="section-link" onclick="showScreen('s-journal')">See all</span>
+      </div>
+      <div class="guided-scroll" id="guided-scroll-home"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SCREEN 2: MORNING WIZARD                    -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="s-morning" class="screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Home
+      </button>
+      <span class="topbar-title">Morning</span>
+      <div style="width:60px;"></div>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="morning-dots"></div>
+
+    <!-- Wizard steps -->
+    <div class="wizard-content" id="morning-wizard-content">
+
+      <!-- Step 0: Name your day -->
+      <div class="step-div" id="m-step-0">
+        <div class="step-label">STEP 1 OF 5</div>
+        <div class="step-heading">Name your day</div>
+        <div class="amber-box" id="m-quote-box"></div>
+        <label class="field-label">Give today a title</label>
+        <input type="text" id="m-day-title" placeholder="e.g. A day of focus and presence…" maxlength="80">
+        <button class="continue-btn" onclick="mContinue()">Continue</button>
+      </div>
+
+      <!-- Step 1: Morning question -->
+      <div class="step-div" id="m-step-1">
+        <div class="step-label">STEP 2 OF 5</div>
+        <div class="step-heading" id="m-question-text"></div>
+        <label class="field-label">Your reflection</label>
+        <textarea id="m-question-answer" rows="6" placeholder="Take your time…"></textarea>
+        <button class="continue-btn" onclick="mContinue()">Continue</button>
+      </div>
+
+      <!-- Step 2: Gratitude -->
+      <div class="step-div" id="m-step-2">
+        <div class="step-label">STEP 3 OF 5</div>
+        <div class="step-heading">What are you grateful for?</div>
+        <div class="gratitude-item">
+          <div class="gratitude-num">1</div>
+          <input type="text" id="m-grat-1" placeholder="I'm grateful for…">
+        </div>
+        <div class="gratitude-item">
+          <div class="gratitude-num">2</div>
+          <input type="text" id="m-grat-2" placeholder="I'm grateful for…">
+        </div>
+        <div class="gratitude-item">
+          <div class="gratitude-num">3</div>
+          <input type="text" id="m-grat-3" placeholder="I'm grateful for…">
+        </div>
+        <button class="continue-btn" onclick="mContinue()">Continue</button>
+      </div>
+
+      <!-- Step 3: Intention -->
+      <div class="step-div" id="m-step-3">
+        <div class="step-label">STEP 4 OF 5</div>
+        <div class="step-heading">Set your intention</div>
+        <label class="field-label">Today I intend to…</label>
+        <textarea id="m-intention" rows="5" placeholder="e.g. be present, speak with kindness, focus on what matters…"></textarea>
+        <button class="continue-btn" onclick="mContinue()">Continue</button>
+      </div>
+
+      <!-- Step 4: Priorities -->
+      <div class="step-div" id="m-step-4">
+        <div class="step-label">STEP 5 OF 5</div>
+        <div class="step-heading">Today's priorities</div>
+        <div class="priority-item">
+          <div class="priority-num">1</div>
+          <input type="text" id="m-pri-1" placeholder="Most important task…">
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">2</div>
+          <input type="text" id="m-pri-2" placeholder="Second priority…">
+        </div>
+        <div class="priority-item">
+          <div class="priority-num">3</div>
+          <input type="text" id="m-pri-3" placeholder="Third priority…">
+        </div>
+        <button class="continue-btn" onclick="mComplete()">Complete ✓</button>
+      </div>
+    </div>
+
+    <!-- Completion -->
+    <div class="completion-div" id="morning-completion">
+      <div class="completion-icon">☀️</div>
+      <div class="completion-title">Morning complete</div>
+      <div class="completion-sub">Your day is set with intention.</div>
+      <div class="completion-streak" id="morning-streak-display">🔥 7 days</div>
+      <div class="completion-msg">"What you do today matters more<br>than what you plan for tomorrow."</div>
+      <button class="home-return-btn" onclick="goHome()">Back to home</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SCREEN 3: EVENING WIZARD                    -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="s-evening" class="screen screen-dark">
+    <div class="topbar topbar-dark">
+      <button class="back-btn back-btn-dark" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Home
+      </button>
+      <span class="topbar-title topbar-title-dark">Evening</span>
+      <div style="width:60px;"></div>
+    </div>
+
+    <div class="progress-dots" id="evening-dots"></div>
+
+    <div class="wizard-content" id="evening-wizard-content">
+
+      <!-- Step 0: Mood score -->
+      <div class="step-div" id="e-step-0">
+        <div class="step-label step-label-dark">STEP 1 OF 6</div>
+        <div class="step-heading step-heading-dark">How are you feeling?</div>
+        <div class="mood-score-display">
+          <div class="mood-score-num mood-score-num-dark" id="e-score-num">7</div>
+          <div class="mood-emoji" id="e-score-emoji">😊</div>
+        </div>
+        <div class="mood-slider-wrap">
+          <input type="range" id="e-mood-slider" class="dark-slider" min="1" max="10" value="7"
+            oninput="updateMoodSlider('e', this.value)">
+          <div class="mood-labels">
+            <span class="mood-label mood-label-dark">Struggling</span>
+            <span class="mood-label mood-label-dark">Thriving</span>
+          </div>
+        </div>
+        <button class="continue-btn continue-btn-dark" onclick="eContinue()">Continue</button>
+      </div>
+
+      <!-- Step 1: Emotions -->
+      <div class="step-div" id="e-step-1">
+        <div class="step-label step-label-dark">STEP 2 OF 6</div>
+        <div class="step-heading step-heading-dark">Your emotions today</div>
+        <div class="chip-grid" id="e-emotions-grid"></div>
+        <button class="continue-btn continue-btn-dark" onclick="eContinue()">Continue</button>
+      </div>
+
+      <!-- Step 2: Factors -->
+      <div class="step-div" id="e-step-2">
+        <div class="step-label step-label-dark">STEP 3 OF 6</div>
+        <div class="step-heading step-heading-dark">What influenced you?</div>
+        <div class="chip-grid" id="e-factors-grid"></div>
+        <button class="continue-btn continue-btn-dark" onclick="eContinue()">Continue</button>
+      </div>
+
+      <!-- Step 3: What went well -->
+      <div class="step-div" id="e-step-3">
+        <div class="step-label step-label-dark">STEP 4 OF 6</div>
+        <div class="step-heading step-heading-dark">What went well today?</div>
+        <textarea id="e-well" rows="6" class="input-dark" placeholder="Even small wins count…"></textarea>
+        <button class="continue-btn continue-btn-dark" onclick="eContinue()">Continue</button>
+      </div>
+
+      <!-- Step 4: Challenges -->
+      <div class="step-div" id="e-step-4">
+        <div class="step-label step-label-dark">STEP 5 OF 6</div>
+        <div class="step-heading step-heading-dark">What challenged you?</div>
+        <textarea id="e-challenges" rows="6" class="input-dark" placeholder="What felt difficult or draining?"></textarea>
+        <button class="continue-btn continue-btn-dark" onclick="eContinue()">Continue</button>
+      </div>
+
+      <!-- Step 5: Learning -->
+      <div class="step-div" id="e-step-5">
+        <div class="step-label step-label-dark">STEP 6 OF 6</div>
+        <div class="step-heading step-heading-dark">What did you learn?</div>
+        <textarea id="e-learning" rows="4" class="input-dark" placeholder="A lesson, insight, or observation…"></textarea>
+        <label class="field-label" style="color:rgba(255,255,255,0.45); margin-top:14px;">Tomorrow's intention</label>
+        <textarea id="e-tomorrow" rows="3" class="input-dark" placeholder="Tomorrow I intend to…"></textarea>
+        <button class="continue-btn continue-btn-dark" onclick="eComplete()">Complete ✓</button>
+      </div>
+    </div>
+
+    <!-- Completion -->
+    <div class="completion-div" id="evening-completion">
+      <div class="completion-icon">🌙</div>
+      <div class="completion-title completion-title-dark">Evening complete</div>
+      <div class="completion-sub completion-sub-dark">You showed up for yourself today.</div>
+      <div class="completion-streak" id="evening-streak-display">🔥 7 days</div>
+      <div class="completion-msg completion-msg-dark">Rest well. Tomorrow is another beginning.</div>
+      <button class="home-return-btn home-return-btn-dark" onclick="goHome()">Back to home</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SCREEN 4: MOOD CHECK-IN                     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="s-mood-checkin" class="screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="showScreen('s-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <span class="topbar-title">Mood Check-in</span>
+      <div style="width:60px;"></div>
+    </div>
+    <div class="mood-checkin-scroll">
+      <div class="step-heading">How are you right now?</div>
+      <div class="mood-score-display" style="margin:16px 0 8px;">
+        <div class="mood-score-num" id="mc-score-num">7</div>
+        <div class="mood-emoji" id="mc-score-emoji">😊</div>
+      </div>
+      <div class="mood-slider-wrap">
+        <input type="range" id="mc-mood-slider" min="1" max="10" value="7"
+          oninput="updateMoodSlider('mc', this.value)">
+        <div class="mood-labels">
+          <span class="mood-label">Struggling</span>
+          <span class="mood-label">Thriving</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="step-heading" style="font-size:16px; margin-bottom:10px;">What's influencing you?</div>
+      <div class="chip-grid" id="mc-factors-grid"></div>
+
+      <button class="save-mood-btn" onclick="saveMoodCheckin()">Save Mood</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SCREEN 5: JOURNAL                           -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="s-journal" class="screen">
+    <div class="topbar">
+      <span class="topbar-brand">Journal</span>
+    </div>
+    <div class="journal-scroll">
+      <button class="free-write-btn" onclick="showScreen('s-journal-write'); openFreeWrite();">
+        <span>✎</span>
+        <span>Free write — Write whatever's on your mind</span>
+      </button>
+
+      <!-- Filter chips -->
+      <div class="filter-chips" id="filter-chips-row"></div>
+
+      <!-- Template grid -->
+      <div class="template-grid" id="template-grid"></div>
+
+      <!-- Recent entries -->
+      <div class="section-header">
+        <span class="section-title">Recent entries</span>
+      </div>
+      <div id="recent-entries-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SCREEN 6: JOURNAL WRITE                     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="s-journal-write" class="screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="showScreen('s-journal'); renderJournalScreen();">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <span class="topbar-title" id="jw-topbar-title">Free Write</span>
+      <button class="topbar-action" onclick="saveJournalEntry()">Save</button>
+    </div>
+    <div class="journal-write-scroll">
+      <div id="jw-prompt-box" class="amber-box" style="display:none;"></div>
+      <textarea id="jw-textarea" class="jw-textarea" placeholder="Begin writing…"></textarea>
+      <div class="word-count-bar">
+        <span id="jw-word-count">0 words</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SCREEN 7: MOOD TRENDS                       -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="s-trends" class="screen">
+    <div class="topbar">
+      <span class="topbar-brand">Trends</span>
+      <div class="topbar-right">
+        <span class="topbar-date" id="trends-period">Last 7 days</span>
+      </div>
+    </div>
+    <div class="trends-scroll">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num" id="trends-avg">–</div>
+          <div class="stat-label">Avg mood</div>
+          <div class="stat-sub">this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="trends-streak">–</div>
+          <div class="stat-label">Day streak</div>
+          <div class="stat-sub">keep going!</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">7-day mood</div>
+        <canvas id="moodChart" height="140"></canvas>
+      </div>
+
+      <div class="insight-card">
+        <div class="insight-title">✦ Insight</div>
+        <div class="insight-text" id="insight-text">Loading insights…</div>
+      </div>
+
+      <div class="factors-card">
+        <div class="factors-title">Top factors</div>
+        <div id="factors-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SCREEN 8: BREATHE                           -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="s-breathe" class="screen screen-dark">
+    <div class="topbar topbar-dark">
+      <span class="topbar-brand topbar-brand-dark">Breathe</span>
+      <span class="topbar-date topbar-date-dark" id="breathe-time-display"></span>
+    </div>
+    <div class="breathe-scroll">
+
+      <div class="technique-btns" id="technique-btns-row"></div>
+
+      <div class="breathe-circle-wrap">
+        <div class="breathe-outer" id="breathe-outer">
+          <div class="breathe-inner" id="breathe-inner">
+            <div class="breathe-count" id="breathe-count">–</div>
+            <div class="breathe-phase" id="breathe-phase">Ready</div>
+          </div>
+        </div>
+        <div class="session-info" id="session-info">Tap Begin to start</div>
+      </div>
+
+      <button class="breathe-start-btn" id="breathe-start-btn" onclick="toggleBreathe()">Begin</button>
+
+      <div class="breathe-quote-card">
+        <div class="bqc-text" id="breathe-quote-text">"The breath returns on its own. Trust it."</div>
+        <div class="bqc-author" id="breathe-quote-author">— Tao wisdom</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BOTTOM NAV ─── -->
+  <nav id="bottom-nav">
+    <button class="nav-item active" id="nav-home" onclick="showScreen('s-home')">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-item" id="nav-journal" onclick="showScreen('s-journal'); renderJournalScreen();">
+      <span class="nav-icon">📓</span>
+      <span class="nav-label">Journal</span>
+    </button>
+    <button class="nav-item" id="nav-mood" onclick="showScreen('s-trends'); renderTrendsScreen();">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Mood</span>
+    </button>
+    <button class="nav-item" id="nav-breathe" onclick="showScreen('s-breathe'); initBreatheScreen();">
+      <span class="nav-icon">🌬️</span>
+      <span class="nav-label">Breathe</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════
+
+const QUOTES = [
+  { text: "The impediment to action advances action. What stands in the way becomes the way.", author: "Marcus Aurelius" },
+  { text: "We suffer more in imagination than in reality.", author: "Seneca" },
+  { text: "Make the best use of what is in your power, and take the rest as it happens.", author: "Epictetus" },
+  { text: "You have power over your mind — not outside events. Realize this, and you will find strength.", author: "Marcus Aurelius" },
+  { text: "Waste no more time arguing about what a good man should be. Be one.", author: "Marcus Aurelius" },
+  { text: "It is not the man who has too little, but the man who craves more, that is poor.", author: "Seneca" },
+  { text: "The happiness of your life depends upon the quality of your thoughts.", author: "Marcus Aurelius" }
+];
+
+const MORNING_QUESTIONS = [
+  "What is within your control today, and what must you accept as it is?",
+  "What kind of person do you want to be today?",
+  "What obstacle might you face today, and how will you meet it?",
+  "What is truly necessary today — and what can you let go of?",
+  "How will you choose to act with integrity today, when tested?"
+];
+
+const BREATHE_QUOTES = [
+  { text: "The breath returns on its own. Trust it.", author: "Tao wisdom" },
+  { text: "Breathing in, I calm my body. Breathing out, I smile.", author: "Thich Nhat Hanh" },
+  { text: "When you own your breath, nobody can steal your peace.", author: "Ancient saying" },
+  { text: "The present moment always will have been.", author: "Stoic wisdom" },
+  { text: "Nature does not hurry, yet everything is accomplished.", author: "Lao Tzu" },
+  { text: "Do you have the patience to wait until your mud settles and the water is clear?", author: "Tao Te Ching" },
+  { text: "Between stimulus and response there is a space. In that space is our power to choose.", author: "Viktor Frankl" }
+];
+
+const EMOTIONS = [
+  "Calm","Anxious","Grateful","Frustrated","Hopeful","Tired",
+  "Energized","Sad","Content","Stressed","Excited","Overwhelmed",
+  "Peaceful","Focused","Lonely","Irritable"
+];
+
+const FACTORS = [
+  "Sleep","Exercise","Work","Relationships","Food","Weather",
+  "Social","Alone time","Meditation","News","Finance","Health"
+];
+
+const TEMPLATES = [
+  { id: 't1', icon: '✨', title: 'Daily Gratitude', cat: 'gratitude', prompt: 'List three things you\'re genuinely grateful for today, and why they matter to you.' },
+  { id: 't2', icon: '🧠', title: 'CBT Thought Record', cat: 'anxiety', prompt: 'Describe a situation that triggered a strong emotion. What was the automatic thought? What\'s the evidence for and against it?' },
+  { id: 't3', icon: '🌙', title: 'Evening Reflection', cat: 'all', prompt: 'What was the high point of today? What challenged you, and what did it teach you?' },
+  { id: 't4', icon: '📊', title: 'Weekly Review', cat: 'productivity', prompt: 'What did you accomplish this week that you\'re proud of? What would you do differently?' },
+  { id: 't5', icon: '⚡', title: 'Fear Setting', cat: 'anxiety', prompt: 'Define what you\'re afraid of. What\'s the worst that could happen? How would you recover? What\'s the cost of inaction?' },
+  { id: 't6', icon: '💛', title: 'Relationship Check-in', cat: 'relationships', prompt: 'Think of someone important to you. How have you shown up for them lately? How have they shown up for you?' },
+  { id: 't7', icon: '🩺', title: 'Therapy Prep', cat: 'all', prompt: 'What\'s been on your mind most this week? What would you most like to explore or understand better?' },
+  { id: 't8', icon: '☀️', title: 'Morning Intention', cat: 'productivity', prompt: 'What is the single most important thing you can accomplish today? What does success look like by tonight?' }
+];
+
+const FILTER_CATS = ['All','Gratitude','Anxiety','Productivity','Relationships'];
+
+const TECHNIQUES = [
+  { id: 'box',    name: 'Box',       sub: '4·4·4·4',  phases: ['Inhale','Hold','Exhale','Rest'],     times: [4,4,4,4] },
+  { id: '478',    name: '4·7·8',     sub: 'Release',  phases: ['Inhale','Hold','Exhale'],            times: [4,7,8]   },
+  { id: 'ocean',  name: 'Ocean',     sub: '5·5',      phases: ['Inhale','Exhale'],                   times: [5,5]     }
+];
+
+// ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+
+const today = () => new Date().toISOString().slice(0, 10);
+const dayOfYear = () => { const n = new Date(); return Math.floor((n - new Date(n.getFullYear(),0,0)) / 86400000); };
+
+function ls(key, def) {
+  try { const v = localStorage.getItem(key); return v !== null ? JSON.parse(v) : def; } catch(e) { return def; }
+}
+function lsSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function shortDate(d) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function dayLabel(i) {
+  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const d = new Date();
+  d.setDate(d.getDate() - (6 - i));
+  return days[d.getDay()];
+}
+
+// ═══════════════════════════════════════════════════
+// SEED DEMO DATA
+// ═══════════════════════════════════════════════════
+
+function seedDemoData() {
+  if (ls('stoic_seeded', null) === '1') return;
+
+  const scores = [6, 7, 8, 5, 7, 9, 8, 6, 7, 8, 5, 6, 8, 7];
+  const emotionSets = [
+    ['Calm','Grateful','Focused'],
+    ['Anxious','Tired','Overwhelmed'],
+    ['Content','Hopeful','Energized'],
+    ['Stressed','Frustrated'],
+    ['Grateful','Peaceful','Calm'],
+    ['Excited','Energized','Hopeful'],
+    ['Focused','Content','Grateful'],
+    ['Tired','Lonely'],
+    ['Calm','Hopeful'],
+    ['Energized','Excited','Focused'],
+    ['Anxious','Stressed'],
+    ['Content','Grateful'],
+    ['Peaceful','Calm','Focused'],
+    ['Hopeful','Grateful','Energized']
+  ];
+  const factorSets = [
+    ['Sleep','Meditation','Exercise'],
+    ['Work','News','Finance'],
+    ['Exercise','Social','Food'],
+    ['Work','Sleep','Finance'],
+    ['Meditation','Alone time','Sleep'],
+    ['Exercise','Social','Relationships'],
+    ['Sleep','Work','Meditation'],
+    ['Relationships','Work'],
+    ['Sleep','Alone time'],
+    ['Exercise','Social','Meditation'],
+    ['Work','News'],
+    ['Food','Sleep','Exercise'],
+    ['Meditation','Sleep','Alone time'],
+    ['Exercise','Social','Food']
+  ];
+
+  const history = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    history.push({
+      date: dateStr,
+      score: scores[13 - i],
+      emotions: emotionSets[13 - i],
+      factors: factorSets[13 - i]
+    });
+  }
+  lsSet('stoic_mood_history', history);
+  lsSet('stoic_streak', 7);
+  lsSet('stoic_last_checkin', today());
+
+  // Seed journal entries
+  const entries = [
+    {
+      date: (() => { const d = new Date(); d.setDate(d.getDate()-2); return d.toISOString().slice(0,10); })(),
+      title: 'Weekly Review',
+      text: 'This week I focused on staying present during difficult conversations. I\'m proud of the patience I showed in the team meeting on Tuesday. Next week I want to prioritize exercise more consistently.',
+      ts: Date.now() - 172800000
+    },
+    {
+      date: (() => { const d = new Date(); d.setDate(d.getDate()-4); return d.toISOString().slice(0,10); })(),
+      title: 'Gratitude practice',
+      text: 'I\'m grateful for the quiet morning, the conversation with my friend, and that the sun came out after a long cloudy stretch.',
+      ts: Date.now() - 345600000
+    },
+    {
+      date: (() => { const d = new Date(); d.setDate(d.getDate()-6); return d.toISOString().slice(0,10); })(),
+      title: 'Fear Setting',
+      text: 'The fear: failing in the new role. Worst case: I struggle for a few months but learn. Recovery: I have skills and support. Cost of inaction: staying stuck where I am is worse.',
+      ts: Date.now() - 518400000
+    }
+  ];
+  lsSet('stoic_journal_entries', entries);
+  lsSet('stoic_seeded', '1');
+}
+
+// ═══════════════════════════════════════════════════
+// STREAK LOGIC
+// ═══════════════════════════════════════════════════
+
+function getStreak() { return ls('stoic_streak', 0); }
+
+function updateStreak() {
+  const t = today();
+  const lastCheckin = ls('stoic_last_checkin', null);
+  let streak = ls('stoic_streak', 0);
+
+  if (!lastCheckin) {
+    streak = 1;
+  } else if (lastCheckin === t) {
+    // already counted today
+  } else {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yStr = yesterday.toISOString().slice(0, 10);
+    if (lastCheckin === yStr) {
+      streak += 1;
+    } else {
+      streak = 1;
+    }
+  }
+  lsSet('stoic_streak', streak);
+  lsSet('stoic_last_checkin', t);
+  return streak;
+}
+
+// ═══════════════════════════════════════════════════
+// SCREEN SWITCHING
+// ═══════════════════════════════════════════════════
+
+const NAV_MAP = {
+  's-home': 'nav-home',
+  's-morning': null,
+  's-evening': null,
+  's-mood-checkin': null,
+  's-journal': 'nav-journal',
+  's-journal-write': 'nav-journal',
+  's-trends': 'nav-mood',
+  's-breathe': 'nav-breathe'
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+
+  // Update nav active state
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navId = NAV_MAP[id];
+  if (navId) {
+    const navEl = document.getElementById(navId);
+    if (navEl) navEl.classList.add('active');
+  }
+
+  // Scroll to top
+  window.scrollTo(0, 0);
+  if (target) target.scrollTop = 0;
+}
+
+function goHome() {
+  showScreen('s-home');
+  refreshHomeScreen();
+}
+
+// ═══════════════════════════════════════════════════
+// HOME SCREEN
+// ═══════════════════════════════════════════════════
+
+function refreshHomeScreen() {
+  // Date
+  const dateEl = document.getElementById('home-date');
+  if (dateEl) {
+    dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  // Streak
+  const streakEl = document.getElementById('home-streak');
+  if (streakEl) streakEl.textContent = '🔥 ' + getStreak() + ' days';
+
+  // Quote
+  const doy = dayOfYear();
+  const q = QUOTES[doy % QUOTES.length];
+  document.getElementById('home-quote-text').textContent = '"' + q.text + '"';
+  document.getElementById('home-quote-author').textContent = '— ' + q.author;
+
+  // Morning/Evening status
+  const morningDone = ls('stoic_morning_' + today(), null) === 'done';
+  const eveningDone = ls('stoic_evening_' + today(), null) === 'done';
+  const mAction = document.getElementById('morning-action');
+  const eAction = document.getElementById('evening-action');
+  if (morningDone) { mAction.textContent = '✓ Done'; mAction.className = 'rc-done'; }
+  else { mAction.textContent = 'Start →'; mAction.className = 'rc-action'; }
+  if (eveningDone) { eAction.textContent = '✓ Done'; eAction.className = 'rc-done'; }
+  else { eAction.textContent = 'Start →'; eAction.className = 'rc-action'; }
+
+  // Guided scroll
+  renderGuidedScroll();
+}
+
+function handleMorningClick() {
+  if (ls('stoic_morning_' + today(), null) === 'done') {
+    if (!confirm('You\'ve already completed this morning\'s reflection. Start again?')) return;
+  }
+  showScreen('s-morning');
+  initMorningWizard();
+}
+
+function handleEveningClick() {
+  if (ls('stoic_evening_' + today(), null) === 'done') {
+    if (!confirm('You\'ve already completed this evening\'s reflection. Start again?')) return;
+  }
+  showScreen('s-evening');
+  initEveningWizard();
+}
+
+function renderGuidedScroll() {
+  const container = document.getElementById('guided-scroll-home');
+  if (!container) return;
+  const show = TEMPLATES.slice(0, 4);
+  container.innerHTML = show.map(t => `
+    <div class="guided-mini-card" onclick="openTemplate('${t.id}')">
+      <div class="gmc-icon">${t.icon}</div>
+      <div class="gmc-title">${t.title}</div>
+      <div class="gmc-tag">${t.cat === 'all' ? 'all topics' : t.cat}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// MORNING WIZARD
+// ═══════════════════════════════════════════════════
+
+let mStep = 0;
+const M_STEPS = 5;
+
+function initMorningWizard() {
+  mStep = 0;
+  document.getElementById('morning-completion').classList.remove('active');
+  document.getElementById('morning-wizard-content').style.display = '';
+
+  // Fill quote
+  const doy = dayOfYear();
+  const q = QUOTES[doy % QUOTES.length];
+  document.getElementById('m-quote-box').textContent = '"' + q.text + '" — ' + q.author;
+
+  // Fill morning question
+  const mq = MORNING_QUESTIONS[doy % MORNING_QUESTIONS.length];
+  document.getElementById('m-question-text').textContent = mq;
+
+  // Clear fields
+  ['m-day-title','m-question-answer','m-grat-1','m-grat-2','m-grat-3','m-intention','m-pri-1','m-pri-2','m-pri-3']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  renderMorningDots();
+  showMorningStep(0);
+}
+
+function renderMorningDots() {
+  const c = document.getElementById('morning-dots');
+  c.innerHTML = Array.from({length: M_STEPS}, (_, i) =>
+    `<div class="dot${i === mStep ? ' active' : ''}"></div>`
+  ).join('');
+}
+
+function showMorningStep(step) {
+  for (let i = 0; i < M_STEPS; i++) {
+    const el = document.getElementById('m-step-' + i);
+    if (el) el.classList.toggle('active', i === step);
+  }
+  renderMorningDots();
+}
+
+function mContinue() {
+  if (mStep < M_STEPS - 1) {
+    mStep++;
+    showMorningStep(mStep);
+    window.scrollTo(0, 0);
+  }
+}
+
+function mComplete() {
+  lsSet('stoic_morning_' + today(), 'done');
+  const streak = updateStreak();
+  document.getElementById('morning-streak-display').textContent = '🔥 ' + streak + ' days';
+  document.getElementById('morning-wizard-content').style.display = 'none';
+  document.getElementById('morning-completion').classList.add('active');
+
+  // Save morning entry to journal
+  const title = document.getElementById('m-day-title').value || 'Morning Reflection';
+  const parts = [
+    document.getElementById('m-question-answer').value,
+    'Grateful for: ' + [1,2,3].map(n => document.getElementById('m-grat-'+n).value).filter(Boolean).join(', '),
+    'Intention: ' + document.getElementById('m-intention').value,
+    'Priorities: ' + [1,2,3].map(n => document.getElementById('m-pri-'+n).value).filter(Boolean).join(', ')
+  ].filter(p => p && p.length > 3);
+  if (parts.length > 0) saveEntry(title, parts.join('\n\n'));
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════
+// EVENING WIZARD
+// ═══════════════════════════════════════════════════
+
+let eStep = 0;
+const E_STEPS = 6;
+let eSelectedEmotions = [];
+let eSelectedFactors = [];
+
+function initEveningWizard() {
+  eStep = 0;
+  eSelectedEmotions = [];
+  eSelectedFactors = [];
+  document.getElementById('evening-completion').classList.remove('active');
+  document.getElementById('evening-wizard-content').style.display = '';
+
+  // Reset slider
+  const sl = document.getElementById('e-mood-slider');
+  sl.value = 7;
+  updateMoodSlider('e', 7);
+
+  // Clear textareas
+  ['e-well','e-challenges','e-learning','e-tomorrow'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+
+  // Render chip grids
+  renderChipGrid('e-emotions-grid', EMOTIONS, eSelectedEmotions, 'emotion');
+  renderChipGrid('e-factors-grid', FACTORS, eSelectedFactors, 'factor-e');
+
+  renderEveningDots();
+  showEveningStep(0);
+}
+
+function renderEveningDots() {
+  const c = document.getElementById('evening-dots');
+  c.innerHTML = Array.from({length: E_STEPS}, (_, i) =>
+    `<div class="dot dot-dark${i === eStep ? ' active' : ''}"></div>`
+  ).join('');
+}
+
+function showEveningStep(step) {
+  for (let i = 0; i < E_STEPS; i++) {
+    const el = document.getElementById('e-step-' + i);
+    if (el) el.classList.toggle('active', i === step);
+  }
+  renderEveningDots();
+}
+
+function eContinue() {
+  if (eStep < E_STEPS - 1) {
+    eStep++;
+    showEveningStep(eStep);
+    window.scrollTo(0, 0);
+  }
+}
+
+function eComplete() {
+  const score = parseInt(document.getElementById('e-mood-slider').value);
+  const entry = {
+    date: today(),
+    score: score,
+    emotions: [...eSelectedEmotions],
+    factors: [...eSelectedFactors]
+  };
+  const history = ls('stoic_mood_history', []);
+  // Remove existing entry for today if any
+  const filtered = history.filter(e => e.date !== today());
+  filtered.push(entry);
+  // Keep last 30
+  lsSet('stoic_mood_history', filtered.slice(-30));
+
+  lsSet('stoic_evening_' + today(), 'done');
+  const streak = updateStreak();
+  document.getElementById('evening-streak-display').textContent = '🔥 ' + streak + ' days';
+  document.getElementById('evening-wizard-content').style.display = 'none';
+  document.getElementById('evening-completion').classList.add('active');
+
+  // Save evening entry
+  const parts = [
+    document.getElementById('e-well').value && ('What went well: ' + document.getElementById('e-well').value),
+    document.getElementById('e-challenges').value && ('Challenges: ' + document.getElementById('e-challenges').value),
+    document.getElementById('e-learning').value && ('Learned: ' + document.getElementById('e-learning').value),
+    document.getElementById('e-tomorrow').value && ('Tomorrow: ' + document.getElementById('e-tomorrow').value)
+  ].filter(Boolean);
+  if (parts.length > 0) saveEntry('Evening Reflection', parts.join('\n\n'));
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════
+// CHIP GRIDS
+// ═══════════════════════════════════════════════════
+
+function renderChipGrid(containerId, items, selectedArr, type) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = items.map(item => `
+    <button class="chip${selectedArr.includes(item) ? ' selected' : ''}"
+      onclick="toggleChip('${containerId}', '${item}', '${type}')">
+      ${item}
+    </button>
+  `).join('');
+}
+
+function toggleChip(containerId, item, type) {
+  let arr;
+  if (type === 'emotion') arr = eSelectedEmotions;
+  else if (type === 'factor-e') arr = eSelectedFactors;
+  else if (type === 'factor-mc') arr = mcSelectedFactors;
+  else return;
+
+  const idx = arr.indexOf(item);
+  if (idx > -1) arr.splice(idx, 1);
+  else arr.push(item);
+
+  renderChipGrid(containerId, type === 'emotion' ? EMOTIONS : FACTORS, arr, type);
+}
+
+// ═══════════════════════════════════════════════════
+// MOOD SLIDER
+// ═══════════════════════════════════════════════════
+
+function updateMoodSlider(prefix, val) {
+  val = parseInt(val);
+  let emoji;
+  if (val <= 2) emoji = '😞';
+  else if (val <= 4) emoji = '😔';
+  else if (val <= 6) emoji = '😐';
+  else if (val <= 8) emoji = '😊';
+  else emoji = '😄';
+
+  const numEl = document.getElementById(prefix + '-score-num');
+  const emojiEl = document.getElementById(prefix + '-score-emoji');
+  if (numEl) numEl.textContent = val;
+  if (emojiEl) emojiEl.textContent = emoji;
+
+  // Update slider gradient
+  const slider = document.getElementById(prefix + '-mood-slider');
+  if (slider) {
+    const pct = ((val - 1) / 9 * 100).toFixed(1);
+    const isDark = slider.classList.contains('dark-slider');
+    const color = isDark ? '#8AB4E8' : 'var(--morning)';
+    const trackBg = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+    slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${pct}%, ${trackBg} ${pct}%)`;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// MOOD CHECK-IN
+// ═══════════════════════════════════════════════════
+
+let mcSelectedFactors = [];
+
+function initMoodCheckin() {
+  mcSelectedFactors = [];
+  const sl = document.getElementById('mc-mood-slider');
+  sl.value = 7;
+  updateMoodSlider('mc', 7);
+  renderChipGrid('mc-factors-grid', FACTORS, mcSelectedFactors, 'factor-mc');
+}
+
+function saveMoodCheckin() {
+  const score = parseInt(document.getElementById('mc-mood-slider').value);
+  const entry = {
+    date: today(),
+    score: score,
+    emotions: [],
+    factors: [...mcSelectedFactors]
+  };
+  const history = ls('stoic_mood_history', []);
+  const filtered = history.filter(e => e.date !== today());
+  filtered.push(entry);
+  lsSet('stoic_mood_history', filtered.slice(-30));
+  updateStreak();
+
+  // Feedback
+  const btn = document.querySelector('.save-mood-btn');
+  btn.textContent = '✓ Saved!';
+  btn.style.background = 'var(--green)';
+  setTimeout(() => { btn.textContent = 'Save Mood'; btn.style.background = ''; goHome(); }, 900);
+}
+
+// ═══════════════════════════════════════════════════
+// JOURNAL SCREEN
+// ═══════════════════════════════════════════════════
+
+let activeFilter = 'All';
+
+function renderJournalScreen() {
+  renderFilterChips();
+  renderTemplateGrid();
+  renderRecentEntries();
+}
+
+function renderFilterChips() {
+  const row = document.getElementById('filter-chips-row');
+  if (!row) return;
+  row.innerHTML = FILTER_CATS.map(cat => `
+    <button class="filter-chip${cat === activeFilter ? ' active' : ''}"
+      onclick="setFilter('${cat}')">
+      ${cat}
+    </button>
+  `).join('');
+}
+
+function setFilter(cat) {
+  activeFilter = cat;
+  renderFilterChips();
+  renderTemplateGrid();
+}
+
+function renderTemplateGrid() {
+  const grid = document.getElementById('template-grid');
+  if (!grid) return;
+  grid.innerHTML = TEMPLATES.map(t => {
+    const show = activeFilter === 'All' || t.cat === activeFilter.toLowerCase() || t.cat === 'all';
+    return `
+      <div class="template-card" ${show ? '' : 'data-hidden="true" style="display:none;"'}
+        onclick="openTemplate('${t.id}')">
+        <div class="tc-icon">${t.icon}</div>
+        <div class="tc-title">${t.title}</div>
+        <div class="tc-cat">${t.cat === 'all' ? 'all topics' : t.cat}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderRecentEntries() {
+  const container = document.getElementById('recent-entries-list');
+  if (!container) return;
+  const entries = ls('stoic_journal_entries', []);
+  const recent = entries.slice(-3).reverse();
+  if (recent.length === 0) {
+    container.innerHTML = '<div class="no-entries">No entries yet. Start writing!</div>';
+    return;
+  }
+  container.innerHTML = recent.map(e => `
+    <div class="recent-entry">
+      <div class="re-date">${shortDate(e.date)}</div>
+      <div class="re-title">${e.title}</div>
+      <div class="re-preview">${(e.text || '').slice(0, 80)}${e.text && e.text.length > 80 ? '…' : ''}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// JOURNAL WRITE
+// ═══════════════════════════════════════════════════
+
+let currentTemplate = null;
+let autoSaveTimer = null;
+
+function openFreeWrite() {
+  currentTemplate = null;
+  document.getElementById('jw-topbar-title').textContent = 'Free Write';
+  document.getElementById('jw-prompt-box').style.display = 'none';
+  const ta = document.getElementById('jw-textarea');
+  ta.value = ls('stoic_draft_free', '');
+  ta.placeholder = 'Begin writing…';
+  updateWordCount();
+  showScreen('s-journal-write');
+}
+
+function openTemplate(templateId) {
+  const t = TEMPLATES.find(x => x.id === templateId);
+  if (!t) return;
+  currentTemplate = t;
+  document.getElementById('jw-topbar-title').textContent = t.title;
+  const promptBox = document.getElementById('jw-prompt-box');
+  promptBox.style.display = 'block';
+  promptBox.textContent = t.prompt;
+  const ta = document.getElementById('jw-textarea');
+  ta.value = ls('stoic_draft_' + t.id, '');
+  ta.placeholder = 'Your thoughts…';
+  updateWordCount();
+  showScreen('s-journal-write');
+}
+
+function updateWordCount() {
+  const ta = document.getElementById('jw-textarea');
+  const wc = document.getElementById('jw-word-count');
+  if (!ta || !wc) return;
+  const words = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+  wc.textContent = words + (words === 1 ? ' word' : ' words');
+
+  // Auto-save draft
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    const draftKey = currentTemplate ? 'stoic_draft_' + currentTemplate.id : 'stoic_draft_free';
+    lsSet(draftKey, ta.value);
+  }, 800);
+}
+
+function saveEntry(title, text) {
+  if (!title && !text) return;
+  const entries = ls('stoic_journal_entries', []);
+  entries.push({ date: today(), title: title || 'Untitled', text: text, ts: Date.now() });
+  lsSet('stoic_journal_entries', entries.slice(-30));
+}
+
+function saveJournalEntry() {
+  const ta = document.getElementById('jw-textarea');
+  const text = ta.value.trim();
+  if (!text) { alert('Please write something first.'); return; }
+  const title = currentTemplate ? currentTemplate.title : 'Free Write';
+  saveEntry(title, text);
+
+  // Clear draft
+  const draftKey = currentTemplate ? 'stoic_draft_' + currentTemplate.id : 'stoic_draft_free';
+  localStorage.removeItem(draftKey);
+
+  // Visual feedback
+  const btn = document.querySelector('.topbar-action');
+  btn.textContent = '✓ Saved';
+  btn.style.color = 'var(--green)';
+  setTimeout(() => {
+    btn.textContent = 'Save';
+    btn.style.color = '';
+    showScreen('s-journal');
+    renderJournalScreen();
+  }, 700);
+}
+
+// ═══════════════════════════════════════════════════
+// TRENDS SCREEN
+// ═══════════════════════════════════════════════════
+
+function renderTrendsScreen() {
+  const history = ls('stoic_mood_history', []);
+  const streak = getStreak();
+
+  // Last 7 days
+  const last7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const entry = history.find(e => e.date === dateStr);
+    last7.push({ date: dateStr, score: entry ? entry.score : null, factors: entry ? entry.factors : [] });
+  }
+
+  const validScores = last7.filter(d => d.score !== null).map(d => d.score);
+  const avg = validScores.length ? (validScores.reduce((a,b) => a+b, 0) / validScores.length).toFixed(1) : '–';
+
+  document.getElementById('trends-avg').textContent = avg !== '–' ? avg : '–';
+  document.getElementById('trends-streak').textContent = streak;
+
+  // Draw chart
+  drawMoodChart(last7);
+
+  // Insight
+  renderInsight(last7, validScores);
+
+  // Factors
+  renderFactorBars(history);
+}
+
+function drawMoodChart(data) {
+  const canvas = document.getElementById('moodChart');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 32;
+  const H = 140;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const padL = 10, padR = 10, padT = 10, padB = 30;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  const barW = Math.floor(chartW / 7 * 0.55);
+  const gap = chartW / 7;
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+  ctx.lineWidth = 1;
+  [0,5,10].forEach(v => {
+    const y = padT + chartH - (v / 10 * chartH);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+  });
+
+  data.forEach((d, i) => {
+    const x = padL + i * gap + gap / 2;
+    const label = dayLabel(i);
+
+    // Day label
+    ctx.fillStyle = 'rgba(107,107,112,0.8)';
+    ctx.font = `500 11px Inter, -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x, H - 8);
+
+    if (d.score === null) return;
+
+    const barH = Math.max(4, d.score / 10 * chartH);
+    const y = padT + chartH - barH;
+
+    let color;
+    if (d.score >= 7) color = '#34A853';
+    else if (d.score >= 5) color = '#D4913A';
+    else color = '#EF5350';
+
+    // Bar with rounded top
+    ctx.fillStyle = color;
+    const r = Math.min(5, barW / 2);
+    ctx.beginPath();
+    ctx.moveTo(x - barW/2 + r, y);
+    ctx.lineTo(x + barW/2 - r, y);
+    ctx.quadraticCurveTo(x + barW/2, y, x + barW/2, y + r);
+    ctx.lineTo(x + barW/2, padT + chartH);
+    ctx.lineTo(x - barW/2, padT + chartH);
+    ctx.lineTo(x - barW/2, y + r);
+    ctx.quadraticCurveTo(x - barW/2, y, x - barW/2 + r, y);
+    ctx.closePath();
+    ctx.fill();
+
+    // Score label on bar if tall enough
+    if (barH > 20) {
+      ctx.fillStyle = '#fff';
+      ctx.font = `700 10px Inter, -apple-system, sans-serif`;
+      ctx.fillText(d.score, x, y + 13);
+    }
+  });
+}
+
+function renderInsight(last7, scores) {
+  const el = document.getElementById('insight-text');
+  if (!el) return;
+  if (scores.length === 0) { el.textContent = 'Check in daily to unlock mood insights.'; return; }
+  const avg = scores.reduce((a,b) => a+b, 0) / scores.length;
+  const trend = scores.length >= 2 ? scores[scores.length-1] - scores[0] : 0;
+  let txt;
+  if (trend > 2) txt = `Your mood has been trending upward this week — you're up ${trend} points from where you started. Keep going.`;
+  else if (trend < -2) txt = `This has been a tougher week, with a ${Math.abs(trend)}-point dip in mood. Remember: noticing the dip is itself a form of strength.`;
+  else if (avg >= 7) txt = `You've had a strong week with an average mood of ${avg.toFixed(1)}. Whatever you're doing — keep doing it.`;
+  else if (avg >= 5) txt = `A steady week. Your average mood was ${avg.toFixed(1)} — stable and resilient. Small consistent efforts accumulate.`;
+  else txt = `Your average mood was ${avg.toFixed(1)} this week. Be gentle with yourself, and consider which factors you can shift.`;
+  el.textContent = txt;
+}
+
+function renderFactorBars(history) {
+  const container = document.getElementById('factors-list');
+  if (!container) return;
+
+  const factorData = {};
+  history.forEach(entry => {
+    if (!entry.factors) return;
+    entry.factors.forEach(f => {
+      if (!factorData[f]) factorData[f] = { sum: 0, count: 0 };
+      factorData[f].sum += entry.score || 0;
+      factorData[f].count += 1;
+    });
+  });
+
+  const sorted = Object.entries(factorData)
+    .map(([name, d]) => ({ name, avg: d.sum / d.count, count: d.count }))
+    .sort((a, b) => b.avg - a.avg)
+    .slice(0, 6);
+
+  if (sorted.length === 0) {
+    container.innerHTML = '<div class="no-entries">Track your mood to see which factors influence it.</div>';
+    return;
+  }
+
+  const maxAvg = 10;
+  container.innerHTML = sorted.map(f => {
+    const pct = (f.avg / maxAvg * 100).toFixed(1);
+    let barColor;
+    if (f.avg >= 7) barColor = 'var(--green)';
+    else if (f.avg >= 5) barColor = 'var(--morning)';
+    else barColor = 'var(--red)';
+    return `
+      <div class="factor-row">
+        <div class="factor-name">${f.name}</div>
+        <div class="factor-bar-bg">
+          <div class="factor-bar-fill" style="width:${pct}%; background:${barColor};"></div>
+        </div>
+        <div class="factor-score">${f.avg.toFixed(1)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// BREATHE SCREEN
+// ═══════════════════════════════════════════════════
+
+let breatheState = {
+  active: false,
+  techIdx: 0,
+  phase: 0,
+  count: 0,
+  cycles: 0,
+  totalSecs: 0,
+  timer: null,
+  totalTimer: null
+};
+
+function initBreatheScreen() {
+  renderTechniqueBtns();
+  const doy = dayOfYear();
+  const bq = BREATHE_QUOTES[doy % BREATHE_QUOTES.length];
+  document.getElementById('breathe-quote-text').textContent = '"' + bq.text + '"';
+  document.getElementById('breathe-quote-author').textContent = '— ' + bq.author;
+  updateBreatheTime();
+  if (!breatheState.active) resetBreatheDisplay();
+}
+
+function renderTechniqueBtns() {
+  const row = document.getElementById('technique-btns-row');
+  if (!row) return;
+  row.innerHTML = TECHNIQUES.map((t, i) => `
+    <button class="technique-btn${i === breatheState.techIdx ? ' active' : ''}"
+      onclick="selectTechnique(${i})">
+      ${t.name}<br><span style="opacity:0.7">${t.sub}</span>
+    </button>
+  `).join('');
+}
+
+function selectTechnique(idx) {
+  if (breatheState.active) stopBreathe();
+  breatheState.techIdx = idx;
+  renderTechniqueBtns();
+  resetBreatheDisplay();
+}
+
+function resetBreatheDisplay() {
+  document.getElementById('breathe-count').textContent = '–';
+  document.getElementById('breathe-phase').textContent = 'Ready';
+  document.getElementById('session-info').textContent = 'Tap Begin to start';
+  const btn = document.getElementById('breathe-start-btn');
+  btn.textContent = 'Begin';
+  btn.classList.remove('stop-mode');
+  const outer = document.getElementById('breathe-outer');
+  const inner = document.getElementById('breathe-inner');
+  outer.style.transform = 'scale(1)';
+  inner.style.transform = 'scale(1)';
+}
+
+function updateBreatheTime() {
+  const el = document.getElementById('breathe-time-display');
+  if (el) {
+    el.textContent = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+}
+
+function toggleBreathe() {
+  if (breatheState.active) stopBreathe();
+  else startBreathe();
+}
+
+function startBreathe() {
+  breatheState.active = true;
+  breatheState.phase = 0;
+  breatheState.cycles = 0;
+  breatheState.totalSecs = 0;
+  const btn = document.getElementById('breathe-start-btn');
+  btn.textContent = 'Stop';
+  btn.classList.add('stop-mode');
+
+  breatheState.totalTimer = setInterval(() => {
+    breatheState.totalSecs++;
+    updateSessionInfo();
+  }, 1000);
+
+  runBreathePhase();
+}
+
+function stopBreathe() {
+  breatheState.active = false;
+  clearInterval(breatheState.timer);
+  clearInterval(breatheState.totalTimer);
+  breatheState.timer = null;
+  breatheState.totalTimer = null;
+  resetBreatheDisplay();
+}
+
+function runBreathePhase() {
+  if (!breatheState.active) return;
+  const tech = TECHNIQUES[breatheState.techIdx];
+  const phase = breatheState.phase % tech.phases.length;
+  const phaseName = tech.phases[phase];
+  const phaseDur = tech.times[phase];
+
+  document.getElementById('breathe-phase').textContent = phaseLabel(phaseName);
+
+  // Animate circle
+  const outer = document.getElementById('breathe-outer');
+  const inner = document.getElementById('breathe-inner');
+  const transTime = (phaseDur - 0.15) + 's';
+  outer.style.transition = `transform ${transTime} ease-in-out`;
+  inner.style.transition = `transform ${transTime} ease-in-out`;
+
+  if (phaseName === 'Inhale') {
+    outer.style.transform = 'scale(1.18)';
+    inner.style.transform = 'scale(1.12)';
+  } else if (phaseName === 'Exhale') {
+    outer.style.transform = 'scale(0.9)';
+    inner.style.transform = 'scale(0.92)';
+  } else {
+    // Hold/Rest: keep current scale
+  }
+
+  // Countdown
+  let count = phaseDur;
+  document.getElementById('breathe-count').textContent = count;
+
+  clearInterval(breatheState.timer);
+  breatheState.timer = setInterval(() => {
+    count--;
+    if (count > 0) {
+      document.getElementById('breathe-count').textContent = count;
+    } else {
+      clearInterval(breatheState.timer);
+      breatheState.phase++;
+      if (breatheState.phase % tech.phases.length === 0) {
+        breatheState.cycles++;
+        updateSessionInfo();
+      }
+      if (breatheState.active) runBreathePhase();
+    }
+  }, 1000);
+}
+
+function phaseLabel(phase) {
+  const map = { 'Inhale': 'Inhale…', 'Hold': 'Hold…', 'Exhale': 'Exhale…', 'Rest': 'Rest…' };
+  return map[phase] || phase;
+}
+
+function updateSessionInfo() {
+  const m = Math.floor(breatheState.totalSecs / 60);
+  const s = breatheState.totalSecs % 60;
+  const timeStr = m > 0 ? `${m}m ${s}s` : `${s}s`;
+  document.getElementById('session-info').textContent = `${breatheState.cycles} cycle${breatheState.cycles !== 1 ? 's' : ''} · ${timeStr}`;
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  seedDemoData();
+  refreshHomeScreen();
+  initMoodCheckin();
+
+  // Set up textarea word count listener
+  const jwTa = document.getElementById('jw-textarea');
+  if (jwTa) jwTa.addEventListener('input', updateWordCount);
+
+  // Breathe time
+  setInterval(updateBreatheTime, 60000);
+});
+
+// Handle showing mood checkin correctly
+const origShowScreen = showScreen;
+window.showScreen = function(id) {
+  origShowScreen(id);
+  if (id === 's-mood-checkin') initMoodCheckin();
+  if (id === 's-home') refreshHomeScreen();
+};
+</script>
+</body>
+</html>
