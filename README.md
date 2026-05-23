@@ -1,80 +1,119 @@
-# 天机命理 · H5 命理应用 v2
+# Sage — Eastern Wisdom Companion
 
-> 深空暗金主题的沉浸式中国传统命理工具，纯前端、无后端、开箱即用。
+> An AI emotional companion and daily life guidance app for modern women.  
+> Soft rose & cream aesthetic · Eastern wisdom reframed for contemporary life · Pure frontend, no backend.
 
-**在线体验：** https://zl-admin.github.io/project002/
+**Live:** https://zl-admin.github.io/project002/
 
 ---
 
-## 功能页面
+## Positioning
 
-| 页面 | 新名称 | 功能描述 |
-|------|--------|----------|
-| `index.html` | 首页仪表盘 | 今日运势（事业/爱情/财运/健康）+ 宜忌 + 穿衣指南 + 今日卦象 |
-| `destiny.html` | 命运档案 | 四柱八字排盘、五行分析、日主强弱、大运流年 |
-| `sign.html` | 今日签 | 64卦翻牌动效，同一天结果相同，制造每日回访 |
-| `yuanfen.html` | 缘分测算 | 两人生日→五行契合度报告，支持分享 |
-| `dream.html` | 昨夜的梦 | 220+ 条周公解梦词典，分类搜索 + 热门标签 |
-| `jiugong.html` | 数字命运 | 生命数字解析 + 九宫飞星图 |
-| `wish.html` | 星愿 | 许愿灯放飞动效，心愿记录存于本地 |
-| `fengshui.html` | 能量空间 | 旋转风水罗盘、八方能量、居家风水建议 |
+| | |
+|---|---|
+| **App name** | Sage |
+| **Tagline** | Eastern wisdom for modern life |
+| **Target user** | Women 28–45, western professionals, modern urban anxiety |
+| **Interest tags** | astrology · tarot · self-healing · mindfulness · journaling |
+| **Not** | Chinese fortune-telling. Eastern wisdom (I Ching, Taoism) as a lens for clarity and reflection. |
+| **Inspired by** | Finch (wellness + gamification) · Stoic (self-reflection toolkit) |
 
-## 核心 JS 模块
+---
 
-| 文件 | 说明 |
-|------|------|
-| `js/daily.js` | 每日运势引擎：种子随机（同日同结果）、宜忌池、穿衣指南（五行联动）、农历显示 |
-| `js/bazi.js` | 八字引擎：儒略日算日柱、天干地支、五行旺衰、喜忌神、大运 |
-| `js/hexagram.js` | 六十四卦完整数据：卦辞、象传、综合释义、吉凶标签 |
-| `js/dream.js` | 解梦词典：220+ 条，支持关键词 / 分类搜索 |
+## Core Pages (v3)
 
-## 设计风格
+| Page | Role | Key Features |
+|------|------|-------------|
+| `index.html` | **Today** | Mood check-in · Daily energy scores (Focus/Connection/Abundance/Vitality) · Rotating intention prompt · Today's flow (aligned/mindful of) · I Ching hexagram preview |
+| `reflect.html` | **Reflect** | Mood tracker · Eastern-wisdom journal prompts (daily rotating) · Free journal (localStorage) · 7-day mood history · Past entry archive |
+| `breathe.html` | **Breathe** | Animated breathing circle · Box (4·4·4·4) / 4·7·8 / Ocean (5·5) techniques · Session timer + cycle counter · Tao wisdom quotes |
+| `wisdom.html` | **Wisdom** | Daily I Ching hexagram · Full English interpretations (all 64 hexagrams) · Tao Te Ching quotes · Reflection prompt → links to journal |
+| `destiny.html` | **You** | Birth chart (四柱八字) · Five-element analysis · Personality archetype · Luck cycles |
 
-| 项目 | 规格 |
-|------|------|
-| 主色调 | 深宇宙蓝紫 `#0d0d1a` + 金色 `#c9a84c` |
-| 卡片质感 | 毛玻璃 `backdrop-filter: blur(12px)` + 金色描边 |
-| 背景动效 | Canvas 星粒闪烁 |
-| 字体 | Noto Serif SC（衬线标题）+ Noto Sans SC（细圆体正文） |
-| 动效 | 卡片浮入、数值滚动、翻牌、星愿放飞、罗盘旋转 |
+## Secondary Pages (legacy, Chinese)
 
-## 技术栈
+| Page | Feature |
+|------|---------|
+| `sign.html` | Daily hexagram card flip (今日签) |
+| `yuanfen.html` | Compatibility reading (缘分测算) |
+| `dream.html` | Dream dictionary 220+ entries (解梦) |
+| `jiugong.html` | Numerology + Nine Palace grid |
+| `wish.html` | Lantern wish animation (星愿) |
+| `fengshui.html` | Feng shui compass (风水罗盘) |
 
-- 纯 HTML / CSS / JavaScript，无任何框架或构建工具
-- 移动端优先，适配 375–480px 宽度
-- LocalStorage 持久化（命运档案、许愿记录）
-- 运势算法使用日期种子，同日访问结果一致
+---
 
-## 本地运行
+## Design System (v3)
+
+| Token | Value |
+|-------|-------|
+| Background | `#FDF9F7` warm cream |
+| Primary | `#B87878` rose |
+| Secondary | `#7A9172` sage green |
+| Accent | `#B8895A` warm tan |
+| Text | `#2D2419` warm dark brown |
+| Heading font | Cormorant Garamond (elegant serif) |
+| Body font | DM Sans (modern, clean) |
+| Cards | Pure white `#FFFFFF` + soft rose shadow |
+| Radius | 20px cards · 12px inner elements |
+| Animation | Slow fade-up entries · Breathing circle CSS transition |
+
+**Before (v2):** Deep space dark blue `#0d0d1a` + gold `#c9a84c` · Star canvas · Chinese fortune-telling  
+**After (v3):** Warm cream + rose · Soft gradient ambient · Eastern wisdom companion
+
+---
+
+## JS Modules
+
+| File | Description |
+|------|-------------|
+| `js/daily.js` | Daily engine: seeded random (same day = same result), yi/ji pools, clothing guide, zodiac, lunar date |
+| `js/hexagram.js` | 64 I Ching hexagrams: full data, `getHexagramByDate()`, `drawHexagram()` |
+| `js/bazi.js` | Birth chart engine: Julian Day method, heavenly stems/earthly branches, five-element analysis, luck cycles |
+| `js/dream.js` | Dream dictionary: 220+ entries, keyword + category search |
+
+---
+
+## Tech Stack
+
+- Pure HTML / CSS / JavaScript — zero frameworks, zero build tools
+- Mobile-first, 375–480px optimized
+- `localStorage` for mood history, journal entries, birth data, wishes
+- Date-seeded determinism: same day = same hexagram, same intention prompt, same scores
+
+## Local Dev
 
 ```bash
 git clone https://github.com/ZL-admin/project002.git
 cd project002
 python3 -m http.server 8080
-# 浏览器打开 http://localhost:8080
+# Open http://localhost:8080
 ```
 
-## 目录结构
+## File Structure
 
 ```
 project002/
-├── index.html        # 首页仪表盘
-├── destiny.html      # 命运档案
-├── sign.html         # 今日签
-├── yuanfen.html      # 缘分测算
-├── dream.html        # 昨夜的梦
-├── jiugong.html      # 数字命运
-├── wish.html         # 星愿
-├── fengshui.html     # 能量空间
+├── index.html        # Today tab
+├── reflect.html      # Reflect tab (journal + mood)
+├── breathe.html      # Breathe tab (breathing exercises)
+├── wisdom.html       # Wisdom tab (I Ching + Tao quotes)
+├── destiny.html      # You tab (birth chart)
+├── sign.html         # Legacy: daily sign card
+├── yuanfen.html      # Legacy: compatibility
+├── dream.html        # Legacy: dream dictionary
+├── jiugong.html      # Legacy: numerology
+├── wish.html         # Legacy: lantern wishes
+├── fengshui.html     # Legacy: feng shui compass
 ├── css/
-│   └── style.css     # 深空暗金全站主题
+│   └── style.css     # Full design system (rose/cream theme)
 └── js/
-    ├── daily.js      # 每日运势引擎
-    ├── bazi.js       # 八字引擎
-    ├── hexagram.js   # 六十四卦数据
-    └── dream.js      # 解梦词典
+    ├── daily.js      # Daily fortune engine
+    ├── bazi.js       # Birth chart engine
+    ├── hexagram.js   # I Ching 64 hexagrams
+    └── dream.js      # Dream dictionary
 ```
 
-## 免责声明
+---
 
-本工具内容仅供娱乐参考，不构成任何决策建议。
+*Content is for entertainment and reflection purposes only, not decision-making advice.*
