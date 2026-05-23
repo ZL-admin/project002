@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Sage · Breathe</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">Breathe</div>
+    <div class="topbar-sub">A moment to arrive</div>
+  </div>
+</div>
+
+<div class="page">
+  <div style="height:14px;"></div>
+
+  <!-- Technique selector -->
+  <div class="card fade-in" style="margin-bottom:16px;">
+    <div class="section-title">Choose a technique</div>
+    <div class="technique-row" id="tech-row">
+      <button class="technique-btn active" data-tech="box" onclick="selectTech(this)">
+        <div class="t-name">Box</div>
+        <div class="t-sub">4 · 4 · 4 · 4</div>
+      </button>
+      <button class="technique-btn" data-tech="478" onclick="selectTech(this)">
+        <div class="t-name">4 · 7 · 8</div>
+        <div class="t-sub">Release</div>
+      </button>
+      <button class="technique-btn" data-tech="ocean" onclick="selectTech(this)">
+        <div class="t-name">Ocean</div>
+        <div class="t-sub">5 · 5</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Breathing circle -->
+  <div style="display:flex;flex-direction:column;align-items:center;padding:24px 0 16px;">
+    <div class="breath-outer" id="breath-outer">
+      <div class="breath-inner" id="breath-inner">
+        <span class="breath-count" id="breath-count">—</span>
+      </div>
+    </div>
+    <div style="height:20px;"></div>
+    <div class="breath-phase-text" id="breath-phase">Tap Begin when you're ready</div>
+  </div>
+
+  <!-- Session info -->
+  <div style="text-align:center;color:var(--text3);font-size:13px;margin-bottom:20px;min-height:20px;" id="session-info"></div>
+
+  <!-- Start / Stop -->
+  <button class="btn btn-rose" id="breath-btn" onclick="toggleBreath()" style="width:100%;font-size:16px;">
+    Begin
+  </button>
+
+  <div style="height:20px;"></div>
+
+  <!-- Wisdom quote -->
+  <div class="card fade-in-4">
+    <blockquote class="wisdom-quote" id="breath-quote"></blockquote>
+    <div class="wisdom-attr" id="breath-attr"></div>
+  </div>
+
+  <div style="height:8px;"></div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html"   class="nav-item"><span class="nav-icon">◎</span>Today</a>
+  <a href="reflect.html" class="nav-item"><span class="nav-icon">◇</span>Reflect</a>
+  <a href="breathe.html" class="nav-item active"><span class="nav-icon">○</span>Breathe</a>
+  <a href="wisdom.html"  class="nav-item"><span class="nav-icon">✦</span>Wisdom</a>
+  <a href="destiny.html" class="nav-item"><span class="nav-icon">◉</span>You</a>
+</nav>
+
+<script>
+const TECHNIQUES = {
+  box:   { inhale: 4, hold1: 4, exhale: 4, hold2: 4 },
+  '478': { inhale: 4, hold1: 7, exhale: 8, hold2: 0 },
+  ocean: { inhale: 5, hold1: 0, exhale: 5, hold2: 0 }
+};
+
+const QUOTES = [
+  { text: 'The breath returns on its own. Trust it.', attr: 'Tao wisdom' },
+  { text: 'Breathing in, I calm my body. Breathing out, I smile.', attr: 'Thich Nhat Hanh' },
+  { text: 'When you own your breath, nobody can steal your peace.', attr: 'Ancient saying' },
+  { text: 'The present moment always will have been.', attr: 'Stoic wisdom' },
+  { text: 'Do you have the patience to wait until your mud settles and the water is clear?', attr: 'Tao Te Ching, Ch. 15' },
+  { text: 'In returning and rest you shall be saved; in quietness and trust shall be your strength.', attr: 'Isaiah 30:15' },
+  { text: 'Nature does not hurry, yet everything is accomplished.', attr: 'Lao Tzu' }
+];
+const q = QUOTES[new Date().getDate() % QUOTES.length];
+document.getElementById('breath-quote').textContent = q.text;
+document.getElementById('breath-attr').textContent = '— ' + q.attr;
+
+let currentTech = 'box';
+let phase = 'idle';
+let countdown = 0;
+let cycles = 0;
+let timer = null;
+let sessionSecs = 0;
+let sessionTimer = null;
+let running = false;
+
+const outer = document.getElementById('breath-outer');
+const inner = document.getElementById('breath-inner');
+const countEl = document.getElementById('breath-count');
+const phaseEl = document.getElementById('breath-phase');
+const infoEl = document.getElementById('session-info');
+const btn = document.getElementById('breath-btn');
+
+function selectTech(el) {
+  if (running) return;
+  document.querySelectorAll('.technique-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  currentTech = el.dataset.tech;
+}
+
+function setPhase(p) {
+  const t = TECHNIQUES[currentTech];
+  phase = p;
+  const configs = {
+    inhale: { count: t.inhale, text: 'Inhale…', expand: true },
+    hold1:  { count: t.hold1,  text: 'Hold…',   expand: true },
+    exhale: { count: t.exhale, text: 'Exhale…', expand: false },
+    hold2:  { count: t.hold2,  text: 'Rest…',   expand: false }
+  };
+  const cfg = configs[p];
+  countdown = cfg.count;
+  phaseEl.textContent = cfg.text;
+  countEl.textContent = countdown;
+  if (cfg.expand) {
+    outer.classList.add('expanding');
+    inner.classList.add('expanding');
+  } else {
+    outer.classList.remove('expanding');
+    inner.classList.remove('expanding');
+  }
+}
+
+function nextPhase() {
+  const t = TECHNIQUES[currentTech];
+  switch (phase) {
+    case 'inhale': setPhase(t.hold1 > 0 ? 'hold1' : 'exhale'); break;
+    case 'hold1':  setPhase('exhale'); break;
+    case 'exhale':
+      cycles++;
+      infoEl.textContent = `${cycles} cycle${cycles !== 1 ? 's' : ''} · ${formatTime(sessionSecs)}`;
+      setPhase(t.hold2 > 0 ? 'hold2' : 'inhale');
+      break;
+    case 'hold2':  setPhase('inhale'); break;
+  }
+}
+
+function tick() {
+  countdown--;
+  countEl.textContent = countdown > 0 ? countdown : '';
+  if (countdown <= 0) nextPhase();
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+}
+
+function toggleBreath() {
+  if (!running) {
+    running = true;
+    cycles = 0;
+    sessionSecs = 0;
+    btn.textContent = 'Stop';
+    btn.classList.remove('btn-rose');
+    btn.classList.add('btn-outline');
+    document.querySelectorAll('.technique-btn').forEach(b => b.disabled = true);
+    setPhase('inhale');
+    timer = setInterval(tick, 1000);
+    sessionTimer = setInterval(() => {
+      sessionSecs++;
+      infoEl.textContent = `${cycles} cycle${cycles !== 1 ? 's' : ''} · ${formatTime(sessionSecs)}`;
+    }, 1000);
+  } else {
+    clearInterval(timer);
+    clearInterval(sessionTimer);
+    running = false;
+    timer = null;
+    phase = 'idle';
+    btn.textContent = 'Begin';
+    btn.classList.add('btn-rose');
+    btn.classList.remove('btn-outline');
+    outer.classList.remove('expanding');
+    inner.classList.remove('expanding');
+    phaseEl.textContent = 'Tap Begin when you\'re ready';
+    countEl.textContent = '—';
+    document.querySelectorAll('.technique-btn').forEach(b => b.disabled = false);
+    if (cycles > 0) {
+      infoEl.textContent = `Session complete — ${cycles} cycle${cycles !== 1 ? 's' : ''} · ${formatTime(sessionSecs)}`;
+    }
+  }
+}
+</script>
+</body>
+</html>

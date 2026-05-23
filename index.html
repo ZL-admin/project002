@@ -1,149 +1,268 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>天机命理</title>
+<title>Sage</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<canvas id="star-canvas"></canvas>
 
 <div class="topbar">
   <div>
-    <div class="topbar-title">✦ 天机命理</div>
-    <div class="topbar-sub" id="top-date">加载中…</div>
+    <div class="topbar-title">Sage</div>
+    <div class="topbar-sub" id="top-date">—</div>
   </div>
   <div id="top-zodiac" style="font-size:22px;"></div>
 </div>
 
 <div class="page">
-  <div style="height:16px;"></div>
-  <div class="day-banner fade-in" id="day-banner">
-    <div class="day-label" id="day-label">—</div>
-    <div class="day-sub" id="day-lunar">—</div>
+  <div style="height:14px;"></div>
+
+  <!-- Mood check-in -->
+  <div class="card fade-in" style="margin-bottom:12px;">
+    <div class="section-title">How are you feeling?</div>
+    <div class="mood-row" id="mood-row">
+      <div class="mood-chip" data-mood="heavy" onclick="selectMood(this)">
+        <span class="mood-emoji">😔</span>Heavy
+      </div>
+      <div class="mood-chip" data-mood="okay" onclick="selectMood(this)">
+        <span class="mood-emoji">😐</span>Okay
+      </div>
+      <div class="mood-chip" data-mood="soft" onclick="selectMood(this)">
+        <span class="mood-emoji">🌸</span>Soft
+      </div>
+      <div class="mood-chip" data-mood="bright" onclick="selectMood(this)">
+        <span class="mood-emoji">✨</span>Bright
+      </div>
+      <div class="mood-chip" data-mood="grounded" onclick="selectMood(this)">
+        <span class="mood-emoji">🌿</span>Grounded
+      </div>
+    </div>
   </div>
 
-  <div class="card fade-in-2" style="margin-bottom:12px;">
-    <div class="section-title">今日运势</div>
+  <!-- Day banner -->
+  <div class="day-banner fade-in-2">
+    <div class="day-label" id="day-label">—</div>
+    <div class="day-sub" id="day-sub">—</div>
+  </div>
+
+  <!-- Today's intention -->
+  <div class="intention-card fade-in-2" style="margin-bottom:12px;">
+    <div class="intention-label">Today's Reflection</div>
+    <div class="intention-text" id="daily-intention">—</div>
+  </div>
+
+  <!-- Energy compass -->
+  <div class="card fade-in-3" style="margin-bottom:12px;">
+    <div class="section-title">Today's Energies</div>
     <div class="score-grid" id="score-grid"></div>
   </div>
 
-  <div class="card fade-in-3" style="margin-bottom:12px;">
-    <div class="section-title">今日宜忌</div>
-    <div style="display:flex;gap:6px;margin-bottom:6px;"><span class="tag tag-green">宜</span></div>
+  <!-- Quick access -->
+  <div class="quick-grid fade-in-3" style="margin-bottom:12px;">
+    <a href="breathe.html" class="quick-item">
+      <span class="quick-icon">🌬</span>
+      <div>
+        <div class="quick-label">Breathe</div>
+        <div class="quick-sub">Find your centre</div>
+      </div>
+    </a>
+    <a href="reflect.html" class="quick-item">
+      <span class="quick-icon">📓</span>
+      <div>
+        <div class="quick-label">Journal</div>
+        <div class="quick-sub">Write it out</div>
+      </div>
+    </a>
+    <a href="wisdom.html" class="quick-item">
+      <span class="quick-icon">✦</span>
+      <div>
+        <div class="quick-label">Wisdom</div>
+        <div class="quick-sub">Today's hexagram</div>
+      </div>
+    </a>
+    <a href="destiny.html" class="quick-item">
+      <span class="quick-icon">◉</span>
+      <div>
+        <div class="quick-label">Your Story</div>
+        <div class="quick-sub">Inner archetype</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Today's flow (yi/ji reframed) -->
+  <div class="card fade-in-4" style="margin-bottom:12px;">
+    <div class="section-title">Today's Flow</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span class="tag tag-green">Aligned with</span>
+    </div>
     <div class="yiji-row" id="yi-row"></div>
     <div class="gold-divider"></div>
-    <div style="display:flex;gap:6px;margin-bottom:6px;"><span class="tag tag-red">忌</span></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span class="tag tag-red">Be mindful of</span>
+    </div>
     <div class="yiji-row" id="ji-row"></div>
   </div>
 
+  <!-- Hexagram preview -->
   <div class="card fade-in-4" style="margin-bottom:12px;">
-    <div class="section-title">穿衣指南</div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div>
-        <div style="font-size:15px;color:var(--text);font-weight:600;" id="cloth-theme">—</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="cloth-avoid"></div>
-      </div>
-      <div class="clothing-colors" id="cloth-colors" style="margin-left:auto;"></div>
-    </div>
-    <div class="clothing-items mt8" id="cloth-items"></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-    <a href="sign.html" class="card card-gold" style="text-decoration:none;text-align:center;padding:18px 12px;">
-      <div style="font-size:28px;margin-bottom:6px;">🔮</div>
-      <div style="font-family:'Noto Serif SC',serif;font-size:15px;color:var(--gold-lt);">今日签</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:4px;">今天该冲还是等？</div>
-    </a>
-    <a href="destiny.html" class="card" style="text-decoration:none;text-align:center;padding:18px 12px;">
-      <div style="font-size:28px;margin-bottom:6px;">☯️</div>
-      <div style="font-family:'Noto Serif SC',serif;font-size:15px;color:var(--text);">命运档案</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:4px;">你天生的性格密码</div>
-    </a>
-  </div>
-
-  <div class="card fade-in-4" style="margin-bottom:12px;">
-    <div class="section-title">更多探索</div>
-    <div class="feature-grid">
-      <a href="yuanfen.html" class="feature-item"><span class="feature-icon">💑</span><span>缘分测算</span></a>
-      <a href="dream.html"   class="feature-item"><span class="feature-icon">🌙</span><span>昨夜的梦</span></a>
-      <a href="jiugong.html" class="feature-item"><span class="feature-icon">🔢</span><span>数字命运</span></a>
-      <a href="fengshui.html"class="feature-item"><span class="feature-icon">🧿</span><span>能量空间</span></a>
-      <a href="wish.html"    class="feature-item"><span class="feature-icon">🏮</span><span>星愿</span></a>
-      <a href="sign.html"    class="feature-item"><span class="feature-icon">📿</span><span>今日签</span></a>
-      <a href="destiny.html" class="feature-item"><span class="feature-icon">🌌</span><span>命运档案</span></a>
-      <a href="yuanfen.html" class="feature-item"><span class="feature-icon">✨</span><span>契合度</span></a>
-    </div>
-  </div>
-
-  <div class="card fade-in-4" style="margin-bottom:16px;">
-    <div class="section-title">今日卦象</div>
+    <div class="section-title">Today's Hexagram</div>
     <div style="display:flex;align-items:center;gap:16px;">
       <div class="hex-lines" id="hex-lines"></div>
       <div>
-        <div style="font-family:'Noto Serif SC',serif;font-size:20px;color:var(--gold-lt);" id="hex-name">—</div>
-        <div style="font-size:12px;color:var(--gold);margin:4px 0;" id="hex-fortune">—</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--text);" id="hex-name">—</div>
+        <div style="font-size:12px;color:var(--rose-lt);margin:3px 0;letter-spacing:0.06em;" id="hex-fortune">—</div>
         <div style="font-size:12px;color:var(--text3);line-height:1.6;" id="hex-brief">—</div>
       </div>
     </div>
-    <a href="sign.html" style="display:block;text-align:right;margin-top:10px;font-size:12px;color:var(--gold);text-decoration:none;">查看详解 →</a>
+    <a href="wisdom.html" style="display:block;text-align:right;margin-top:10px;font-size:13px;color:var(--rose);text-decoration:none;font-weight:500;">Explore wisdom →</a>
   </div>
+
+  <div style="height:8px;"></div>
 </div>
 
 <nav class="bottom-nav">
-  <a href="index.html"   class="nav-item active"><span class="nav-icon">🏠</span>首页</a>
-  <a href="destiny.html" class="nav-item"><span class="nav-icon">☯️</span>命运</a>
-  <a href="sign.html"    class="nav-item"><span class="nav-icon">🔮</span>今日签</a>
-  <a href="yuanfen.html" class="nav-item"><span class="nav-icon">💑</span>缘分</a>
-  <a href="dream.html"   class="nav-item"><span class="nav-icon">🌙</span>解梦</a>
+  <a href="index.html"   class="nav-item active"><span class="nav-icon">◎</span>Today</a>
+  <a href="reflect.html" class="nav-item"><span class="nav-icon">◇</span>Reflect</a>
+  <a href="breathe.html" class="nav-item"><span class="nav-icon">○</span>Breathe</a>
+  <a href="wisdom.html"  class="nav-item"><span class="nav-icon">✦</span>Wisdom</a>
+  <a href="destiny.html" class="nav-item"><span class="nav-icon">◉</span>You</a>
 </nav>
 
 <script src="js/daily.js"></script>
 <script src="js/hexagram.js"></script>
 <script>
-(function(){
-  const c=document.getElementById('star-canvas'),ctx=c.getContext('2d');let stars=[];
-  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
-  function init(){resize();stars=Array.from({length:120},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.2+0.2,a:Math.random(),speed:Math.random()*0.003+0.001}));}
-  function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.a+=s.speed;if(s.a>1)s.a=0;const alpha=Math.abs(Math.sin(s.a*Math.PI));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,220,${alpha*0.7})`;ctx.fill();});requestAnimationFrame(draw);}
-  window.addEventListener('resize',init);init();draw();
-})();
+const today = new Date();
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-const today=new Date();
-const weekdays=['日','一','二','三','四','五','六'];
-document.getElementById('top-date').textContent=`${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日 周${weekdays[today.getDay()]}`;
-const zodiac=getZodiacEmoji(today);
-document.getElementById('top-zodiac').textContent=zodiac.emoji;
-document.getElementById('day-lunar').textContent=getLunarDisplay(today)+' · '+zodiac.sign;
+document.getElementById('top-date').textContent =
+  `${DAYS[today.getDay()]}, ${MONTHS[today.getMonth()]} ${today.getDate()}`;
 
-const scores=getFortuneScores(today);
-const dayInfo=getDayLabel(scores);
-document.getElementById('day-label').textContent='✨ 今天是你的'+dayInfo.text;
+const zodiac = getZodiacEmoji(today);
+document.getElementById('top-zodiac').textContent = zodiac.emoji;
 
-const scoreItems=[{key:'career',emoji:'💼',label:'事业'},{key:'love',emoji:'💗',label:'爱情'},{key:'wealth',emoji:'💰',label:'财运'},{key:'health',emoji:'🌿',label:'健康'}];
-const scoreColors={career:'#c9a84c',love:'#f48fb1',wealth:'#81c784',health:'#4fc3f7'};
-document.getElementById('score-grid').innerHTML=scoreItems.map(item=>{
-  const val=scores[item.key];
-  const cls=val>=80?'score-great':val>=65?'score-good':val>=50?'score-mid':'score-low';
-  return `<div class="score-item ${cls}"><div class="score-emoji">${item.emoji}</div><div class="score-label">${item.label}</div><div class="score-value">${val}</div><div class="score-bar"><div class="score-bar-fill" style="width:${val}%;background:${scoreColors[item.key]};"></div></div></div>`;
+// Day banner
+const scores = getFortuneScores(today);
+const avg = (scores.career + scores.love + scores.wealth + scores.health) / 4;
+const DAY_LABELS = [
+  { text: 'A reflective day', sub: 'Rest, listen, and let things settle' },
+  { text: 'A steady day',     sub: 'Groundedness is your greatest strength today' },
+  { text: 'A flowing day',    sub: 'Trust the current and stay present' },
+  { text: 'A radiant day',    sub: 'Conditions are favorable — move with intention' }
+];
+const labelIdx = avg >= 80 ? 3 : avg >= 65 ? 2 : avg >= 50 ? 1 : 0;
+document.getElementById('day-label').textContent = DAY_LABELS[labelIdx].text;
+document.getElementById('day-sub').textContent = DAY_LABELS[labelIdx].sub;
+
+// Daily intention (seeded by date)
+const INTENTIONS = [
+  'Where can you create space for stillness today?',
+  'What would your most grounded self choose in this moment?',
+  'Notice the tension you\'re carrying. Where in your body does it live?',
+  'What would you do today if you weren\'t afraid of being wrong?',
+  'Who needs your presence, not your perfection?',
+  'Where are you forcing what should flow naturally?',
+  'What is this moment asking of you — not yesterday or tomorrow?',
+  'Where in your life are you resisting what already is?',
+  'What does your body need that your mind keeps dismissing?',
+  'What simple thing would bring you joy today?',
+  'What pulls your attention most? Is that where your heart wants to go?',
+  'Where can you choose rest over productivity today?',
+  'How can you be more like water today — adaptive and resilient?',
+  'What are you not saying that needs to be said?',
+  'How do you want to feel at the end of today?',
+  'What are you holding onto that no longer serves you?',
+  'Where can you be kinder to yourself today?',
+  'What would the wisest version of you advise right now?',
+  'What fear is masquerading as a practical concern?',
+  'What would feel like real self-care today — not the easy kind?'
+];
+const intentionSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+const intentionIdx = intentionSeed % INTENTIONS.length;
+document.getElementById('daily-intention').textContent = INTENTIONS[intentionIdx];
+
+// Scores (English labels)
+const SCORE_ITEMS = [
+  { key: 'career', emoji: '🎯', label: 'Focus',      color: '#B87878' },
+  { key: 'love',   emoji: '🌸', label: 'Connection', color: '#CFA0A0' },
+  { key: 'wealth', emoji: '🌿', label: 'Abundance',  color: '#7A9172' },
+  { key: 'health', emoji: '☀', label: 'Vitality',   color: '#B8895A' }
+];
+document.getElementById('score-grid').innerHTML = SCORE_ITEMS.map(item => {
+  const val = scores[item.key];
+  const cls = val >= 80 ? 'score-great' : val >= 65 ? 'score-good' : val >= 50 ? 'score-mid' : 'score-low';
+  return `<div class="score-item ${cls}">
+    <div class="score-emoji">${item.emoji}</div>
+    <div class="score-label">${item.label}</div>
+    <div class="score-value">${val}</div>
+    <div class="score-bar"><div class="score-bar-fill" style="width:${val}%;background:${item.color};"></div></div>
+  </div>`;
 }).join('');
 
-const yiji=getYiJi(today);
-document.getElementById('yi-row').innerHTML=yiji.yi.map(t=>`<div class="yiji-item"><span class="yi-dot"></span>${t}</div>`).join('');
-document.getElementById('ji-row').innerHTML=yiji.ji.map(t=>`<div class="yiji-item"><span class="ji-dot"></span>${t}</div>`).join('');
+// Today's flow (English pools, seeded)
+const YI_EN = [
+  'Deep conversations','Creative projects','Morning journaling','A walk in nature',
+  'Setting clear intentions','Learning something new','Breathwork or meditation',
+  'Gentle rest','Reaching out to someone you care about','Decluttering your space',
+  'Cooking mindfully','Planning with clarity','Gratitude practice',
+  'A long bath or self-care ritual','Saying something kind',
+  'Starting something you\'ve been putting off','Honest self-reflection',
+  'Solo quiet time','Expressing yourself creatively','Listening without an agenda'
+];
+const JI_EN = [
+  'Overthinking','Impulse spending','Comparing yourself to others',
+  'Avoiding a difficult conversation','Late nights','Big decisions made from emotion',
+  'Overcommitting','Dwelling on the past','Seeking external validation',
+  'Ignoring body signals','Skimping on sleep','Forcing outcomes',
+  'Doom-scrolling first thing in the morning','Saying yes when you mean no',
+  'Overanalyzing what cannot be changed'
+];
+function seededEn(seed) {
+  let s = (seed * 37) >>> 0;
+  return function() {
+    s += 0x6D2B79F5;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rng = seededEn(intentionSeed);
+const shuffleEn = arr => arr.slice().sort(() => rng() - 0.5);
+const yi = shuffleEn(YI_EN).slice(0, 3);
+const ji = shuffleEn(JI_EN).slice(0, 3);
+document.getElementById('yi-row').innerHTML = yi.map(t =>
+  `<div class="yiji-item"><span class="yi-dot"></span>${t}</div>`).join('');
+document.getElementById('ji-row').innerHTML = ji.map(t =>
+  `<div class="yiji-item"><span class="ji-dot"></span>${t}</div>`).join('');
 
-const cloth=getClothing(today);
-document.getElementById('cloth-theme').textContent='今日'+cloth.desc;
-document.getElementById('cloth-avoid').textContent='禁忌：'+cloth.avoid;
-document.getElementById('cloth-colors').innerHTML=cloth.lucky.map(c=>`<div class="color-swatch" style="background:${c};"></div>`).join('');
-document.getElementById('cloth-items').innerHTML=cloth.items.map(i=>`<span class="clothing-item">${i}</span>`).join('');
+// Hexagram
+const HEX_FORTUNE_EN = { '大吉': 'Very Favorable', '吉': 'Favorable', '中': 'Neutral', '凶': 'Challenging' };
+const hex = getHexagramByDate(today);
+document.getElementById('hex-lines').innerHTML = drawHexagram(hex);
+document.getElementById('hex-name').textContent = hex.name + ' · ' + (hex.upper + hex.lower);
+document.getElementById('hex-fortune').textContent = HEX_FORTUNE_EN[hex.fortune] || hex.fortune;
+document.getElementById('hex-brief').textContent = hex.brief;
 
-const hex=getHexagramByDate(today);
-document.getElementById('hex-lines').innerHTML=drawHexagram(hex);
-document.getElementById('hex-name').textContent=hex.name+'卦';
-document.getElementById('hex-fortune').textContent='运势：'+hex.fortune;
-document.getElementById('hex-brief').textContent=hex.brief;
+// Mood check-in (restore from localStorage)
+const todayKey = 'mood_' + today.toISOString().slice(0,10);
+const savedMood = localStorage.getItem(todayKey);
+if (savedMood) {
+  const chip = document.querySelector(`.mood-chip[data-mood="${savedMood}"]`);
+  if (chip) chip.classList.add('selected');
+}
+function selectMood(el) {
+  document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  localStorage.setItem(todayKey, el.dataset.mood);
+  // Log to mood history
+  const hist = JSON.parse(localStorage.getItem('mood_history') || '[]');
+  const entry = { date: today.toISOString().slice(0,10), mood: el.dataset.mood };
+  const idx = hist.findIndex(e => e.date === entry.date);
+  if (idx >= 0) hist[idx] = entry; else hist.push(entry);
+  localStorage.setItem('mood_history', JSON.stringify(hist.slice(-30)));
+}
 </script>
 </body>
 </html>

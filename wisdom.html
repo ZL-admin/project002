@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Sage · Wisdom</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">Wisdom</div>
+    <div class="topbar-sub" id="wisdom-date">—</div>
+  </div>
+</div>
+
+<div class="page">
+  <div style="height:14px;"></div>
+
+  <!-- Hexagram hero card -->
+  <div class="card fade-in" style="margin-bottom:12px;text-align:center;padding:28px 20px;">
+    <div style="margin-bottom:10px;" id="hex-fortune-wrap">
+      <span class="hex-fortune-chip" id="hex-fortune-chip">—</span>
+    </div>
+    <div class="hex-big-symbol" id="hex-symbol">—</div>
+    <div class="hex-big-name" id="hex-name">—</div>
+    <div class="hex-en-name" id="hex-en-name">—</div>
+    <div class="hex-lines" style="margin:16px auto 0;" id="hex-lines"></div>
+  </div>
+
+  <!-- Today's wisdom -->
+  <div class="card fade-in-2" style="margin-bottom:12px;">
+    <div class="section-title">Today's Wisdom</div>
+    <p class="wisdom-body" id="hex-wisdom">—</p>
+  </div>
+
+  <!-- Tao quote -->
+  <div class="card fade-in-3" style="margin-bottom:12px;">
+    <blockquote class="wisdom-quote" id="tao-quote">—</blockquote>
+    <div class="wisdom-attr" id="tao-attr">—</div>
+  </div>
+
+  <!-- Reflection prompt -->
+  <div class="card fade-in-4" style="margin-bottom:12px;">
+    <div class="section-title">Sit with this</div>
+    <p class="prompt-text" id="hex-prompt">—</p>
+    <div style="margin-top:16px;">
+      <a href="reflect.html" class="btn btn-rose" style="width:100%;display:flex;justify-content:center;">
+        Open Journal →
+      </a>
+    </div>
+  </div>
+
+  <!-- Original text -->
+  <div class="card fade-in-4" style="margin-bottom:12px;">
+    <div class="section-title">Original Text</div>
+    <p style="font-size:15px;color:var(--text2);line-height:1.7;" id="hex-original">—</p>
+    <p style="font-size:12px;color:var(--text3);margin-top:8px;" id="hex-source">—</p>
+  </div>
+
+  <div style="height:8px;"></div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html"   class="nav-item"><span class="nav-icon">◎</span>Today</a>
+  <a href="reflect.html" class="nav-item"><span class="nav-icon">◇</span>Reflect</a>
+  <a href="breathe.html" class="nav-item"><span class="nav-icon">○</span>Breathe</a>
+  <a href="wisdom.html"  class="nav-item active"><span class="nav-icon">✦</span>Wisdom</a>
+  <a href="destiny.html" class="nav-item"><span class="nav-icon">◉</span>You</a>
+</nav>
+
+<script src="js/hexagram.js"></script>
+<script>
+const today = new Date();
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+document.getElementById('wisdom-date').textContent =
+  `${DAYS[today.getDay()]}, ${MONTHS[today.getMonth()]} ${today.getDate()}`;
+
+// English names for hexagrams
+const HEX_EN_NAMES = [
+  '', // 0 unused
+  'Qián · The Creative','Kūn · The Receptive','Zhūn · Beginning','Méng · Youth',
+  'Xū · Waiting','Sòng · Conflict','Shī · Leadership','Bǐ · Unity',
+  'Xiǎo Chù · Small Gathering','Lǚ · Treading Carefully','Tài · Peace','Pǐ · Stagnation',
+  'Tóng Rén · Fellowship','Dà Yǒu · Great Possession','Qiān · Humility','Yù · Enthusiasm',
+  'Suí · Following','Gǔ · Decay & Renewal','Lín · Approach','Guān · Observation',
+  'Shì Kè · Breaking Through','Bì · Grace','Bō · Stripping Away','Fù · Return',
+  'Wú Wàng · Innocence','Dà Chù · Great Accumulation','Yí · Nourishment','Dà Guò · Excess',
+  'Kǎn · The Abyss','Lí · Brightness','Xián · Influence','Héng · Perseverance',
+  'Dùn · Retreat','Dà Zhuàng · Great Power','Jìn · Progress','Míng Yí · Darkening',
+  'Jiā Rén · Family','Kuí · Opposition','Jiǎn · Obstruction','Xiè · Release',
+  'Sǔn · Decrease','Yì · Increase','Guài · Resolution','Gòu · Encounter',
+  'Cuì · Gathering','Shēng · Rising','Kùn · Exhaustion','Jǐng · The Well',
+  'Gé · Revolution','Dǐng · The Cauldron','Zhèn · Thunder','Gèn · Stillness',
+  'Jiàn · Gradual Progress','Guī Mèi · The Maiden','Fēng · Abundance','Lǚ · The Wanderer',
+  'Xùn · Wind','Duì · Joy','Huàn · Dispersion','Jié · Limitations',
+  'Zhōng Fú · Inner Truth','Xiǎo Guò · Small Steps','Jì Jì · Fulfilled','Wèi Jì · Becoming'
+];
+
+// English wisdom + prompts for each hexagram
+const HEX_WISDOM = {
+  1:  { w: "Creative force moves through you right now. This is a moment to act boldly and lead from your core values. Your energy can move mountains — channel it with clear purpose.", p: "Where in your life are you being called to step forward with full confidence?" },
+  2:  { w: "The earth doesn't force growth — it creates conditions for it. This hexagram invites you to hold space, support others, and trust in the slow, sure unfolding of things.", p: "Where can you stop pushing and start nurturing today?" },
+  3:  { w: "Every new beginning holds difficulty alongside potential. You are in the phase before the breakthrough — not stuck, just germinating.", p: "What new thing in your life needs patience rather than force?" },
+  4:  { w: "The student who approaches with an open mind receives the greatest teaching. Stay curious, humble, and willing to be taught by life itself.", p: "Where are you assuming you already know the answer?" },
+  5:  { w: "What you seek is coming, but not yet. This is a time to nourish yourself while conditions align — not passivity, but mindful readiness.", p: "What would it feel like to completely trust the timing of your life?" },
+  6:  { w: "The impulse to fight and win can cost more than the thing you're fighting for. Consider where stepping back might preserve what matters most.", p: "What conflict in your life is asking for compromise rather than conquest?" },
+  7:  { w: "True leadership comes from character, not control. Others follow those who are steady, fair, and clear in their values.", p: "Where are you being called to lead by example today?" },
+  8:  { w: "We are stronger in alignment with others. This hexagram calls you toward meaningful collaboration and the warmth of true belonging.", p: "Who do you want to draw closer to, and what is holding you back?" },
+  9:  { w: "You are accumulating wisdom and insight — even if it doesn't look like much yet. Small deposits add up to great reserves.", p: "What small, consistent action would move you toward your larger vision?" },
+  10: { w: "You can walk through uncertain terrain without fear when your steps are grounded in principle. Move carefully, but keep moving.", p: "What uncertain situation are you navigating, and what values can guide you through it?" },
+  11: { w: "Heaven and earth are in harmony — and so can you be. This is one of the most auspicious moments: a true alignment of inner and outer worlds.", p: "What area of your life feels genuinely in flow right now? Can you appreciate it fully?" },
+  12: { w: "When channels are blocked, the wise person conserves energy and waits. Forcing progress now will exhaust you. Trust the winter — spring follows.", p: "Where are you expending energy on something that isn't moving? What might release look like?" },
+  13: { w: "You don't have to walk this path alone. This hexagram calls you toward community, shared purpose, and the power of aligned hearts.", p: "What tribe or relationship is calling you to show up more fully?" },
+  14: { w: "You have more than you realize — in gifts, resources, and capacity. This moment calls for generosity, not hoarding.", p: "What abundance in your life are you undervaluing or not sharing freely?" },
+  15: { w: "The tallest tree bends in the storm and survives. True greatness carries itself lightly. This is a time to let go of ego and let life teach you.", p: "Where has pride or self-protection been getting in your own way?" },
+  16: { w: "Joy is not a reward — it is a resource. Let yourself feel delight, enthusiasm, and aliveness. Your energy is contagious when you're in this state.", p: "What genuinely excites you right now? Are you giving it enough of your time?" },
+  17: { w: "The river doesn't fight its course — it follows the path of least resistance and still reaches the sea. Adapt to the current moment with intelligence.", p: "Where in your life would it serve you to follow rather than lead?" },
+  18: { w: "Something is ready to be composted. Old patterns or stories that no longer serve you are asking to be released so new growth can emerge.", p: "What belief or habit has quietly rotted and needs to be cleared away?" },
+  19: { w: "The moment is favorable for bold, direct action. Conditions won't always be this ripe. Step forward, make contact, begin.", p: "What have you been approaching cautiously that is actually ready for you to claim?" },
+  20: { w: "Before acting, look deeply. This hexagram is about the kind of seeing that goes beneath the surface — intuitive, patient, receptive.", p: "What are you not seeing in your current situation that might change everything?" },
+  21: { w: "There is an obstacle in your path. It needs to be addressed directly, not worked around. Clarity and decisiveness will resolve what avoidance cannot.", p: "What are you tiptoeing around that needs a direct, honest approach?" },
+  22: { w: "Form and beauty matter. How you present yourself, your ideas, your space — these are not superficial. Aesthetics in service of truth is a gift.", p: "Where can you bring more beauty or artistry into your everyday life?" },
+  23: { w: "This is a time of reduction. What seems like loss may be liberation. The fruit falls from the tree to become the seed of a new beginning.", p: "What in your life is falling away naturally? Can you release it with grace?" },
+  24: { w: "After the darkest point comes the return of light. You may be turning a corner you couldn't see coming. Trust the upward movement beginning within you.", p: "What part of yourself are you rediscovering or reclaiming right now?" },
+  25: { w: "Act in alignment with what is real, not what you wish were true. When action rises from genuine integrity, outcomes align naturally.", p: "Where might you be acting from wishful thinking rather than clear seeing?" },
+  26: { w: "You are in a period of building. The storehouse is filling. Don't rush to spend what you're gathering — it's forming into something remarkable.", p: "What are you investing in right now that will serve your future self?" },
+  27: { w: "What you take in shapes who you become — the words, food, information, and relationships you consume. Choose your nourishment wisely.", p: "What are you feeding yourself — mentally, emotionally, physically — and is it truly nourishing?" },
+  28: { w: "You may be carrying more than the structure can hold. This hexagram asks you to redistribute the weight before something breaks.", p: "Where in your life are you overloaded? What could you set down or delegate?" },
+  29: { w: "You are learning to navigate difficulty. The way through is to stay present, keep moving steadily, and trust that mastery comes from walking through — not around.", p: "What recurring challenge is actually teaching you a crucial strength?" },
+  30: { w: "Your inner light is needed. This is a time to be seen, to share your gifts, and to illuminate the world with what you uniquely carry.", p: "What part of yourself are you still hiding that wants to be expressed?" },
+  31: { w: "Heart meets heart. This hexagram is about magnetic resonance — the way genuine connection opens doors that effort cannot.", p: "Where are you relying on strategy when heart-to-heart connection would be more powerful?" },
+  32: { w: "The deepest commitment is the one you keep when no one's watching and nothing's dramatic. Quiet consistency builds the extraordinary.", p: "What commitment have you made to yourself that is worth honoring today?" },
+  33: { w: "This is not defeat — this is strategy. Sometimes the most powerful move is to step back, withdraw gracefully, and preserve your energy for what matters.", p: "Where would wise withdrawal serve you better than continued engagement?" },
+  34: { w: "You have considerable power right now. The question is not whether you can — it's whether you should. Channel this energy through principle, not ego.", p: "Where might you be using your strength in ways that create more resistance than resolution?" },
+  35: { w: "Things are moving forward with remarkable ease. This is a time of visible advancement — receive the recognition, keep your integrity, and keep going.", p: "What progress are you making that you haven't fully acknowledged or celebrated?" },
+  36: { w: "When the light is suppressed, it goes underground — not extinguished. Protect your inner light. This is a season for strategic patience.", p: "How can you protect your vision and values during a time when things feel difficult?" },
+  37: { w: "The quality of your closest relationships shapes everything. This hexagram asks you to tend to the bonds that form your foundation.", p: "What relationship in your life is asking for more care and attention right now?" },
+  38: { w: "Where differences exist, seek the deeper unity beneath them. Even opposites share a common origin.", p: "Where are you in conflict with someone? What might you both actually want in common?" },
+  39: { w: "The blockage is not your enemy — it's telling you something important. The answer lies in turning inward, not pushing harder outward.", p: "What obstacle are you facing? What might it be asking you to reconsider?" },
+  40: { w: "The storm has passed. Tension is releasing. This is the time to act — not later, now. Movement comes naturally when you stop holding back.", p: "What have you been waiting to begin or say? Today may be the right moment." },
+  41: { w: "Less can be more. This hexagram invites you to simplify, let go of excess, and discover what's truly essential.", p: "What would your life feel like if you let go of just one thing that's draining you?" },
+  42: { w: "This is a favorable time to grow, expand, and invest in your future. What you give now returns to you multiplied.", p: "Where can you invest your energy or love in a way that serves both you and others?" },
+  43: { w: "This is a moment for decisive action. Speak clearly, draw clear lines, and be direct about what you need. No more waiting.", p: "What decision or conversation have you been avoiding that you're ready to face directly?" },
+  44: { w: "Something is presenting itself to you. Pay attention — not every encounter is what it seems, and not every opportunity is a gift.", p: "What is entering your life right now, and does it truly align with who you're becoming?" },
+  45: { w: "This is a time to unite, gather, and build collective momentum. The power of aligned community is greater than any individual effort.", p: "What vision or cause are you ready to organize others around?" },
+  46: { w: "Step by step, you are rising. Don't look only at how far you have to go — acknowledge how far you've already come.", p: "Looking back six months, what growth in yourself can you recognize and honor?" },
+  47: { w: "Even in constraint, your character can shine. This hexagram doesn't ask you to pretend things are fine — it asks you to hold your values when tested.", p: "What sustains you when external circumstances feel limiting or draining?" },
+  48: { w: "You are a source of nourishment for others — but only if you tend to yourself first. Replenish before you pour.", p: "What refills you? When did you last give yourself that, without guilt?" },
+  49: { w: "Real change requires something to end before something new can begin. This hexagram endorses transformation that comes from truth.", p: "What significant change are you ready to make — even though it's uncomfortable?" },
+  50: { w: "You are in a time of refinement. Experiences and relationships are being transformed into something of great value.", p: "What experiences are shaping you into someone wiser? Can you find gratitude for them?" },
+  51: { w: "A sudden shock or awakening has arrived. Rather than reacting, pause. This disruption is an invitation to greater awareness.", p: "What has recently disrupted your stability? What is it trying to wake you up to?" },
+  52: { w: "The deepest wisdom sometimes comes from simply stopping. This hexagram is your invitation to be completely still — not as avoidance, but as practice.", p: "What would happen if you completely stopped trying to fix or figure something out for just one hour?" },
+  53: { w: "The most beautiful things grow slowly. Trust in incremental progress and resist the pressure to rush your becoming.", p: "What long-term growth in your life deserves more trust and patience from you?" },
+  54: { w: "Relationships require navigation of power, expectation, and timing. Proceed in matters of the heart with both openness and discernment.", p: "What role or dynamic in a relationship are you ready to renegotiate?" },
+  55: { w: "This is your peak moment. Richness surrounds you — in experiences, connection, or opportunity. Receive it fully and share generously.", p: "What abundance exists in your life right now that you may be taking for granted?" },
+  56: { w: "You are moving through unfamiliar territory. Approach it with lightness, adaptability, and respect for what you don't yet understand.", p: "What new territory — internal or external — are you navigating, and what do you need to thrive there?" },
+  57: { w: "Subtle persistence shapes everything. Water carves canyons not by force but by patience. Your steady presence is more powerful than you know.", p: "Where could gentle, consistent action achieve what force has not?" },
+  58: { w: "Joy is not the absence of difficulty — it is the presence of genuine connection and delight. Let yourself be fully, shamelessly happy right now.", p: "What brings you pure, uncomplicated joy? Are you allowing yourself enough of it?" },
+  59: { w: "What has been rigid is beginning to soften. Let the barriers between yourself and others dissolve where they no longer serve.", p: "Where have you been keeping people at a distance that you actually want to draw closer?" },
+  60: { w: "Constraints aren't obstacles — they're the frame that makes art possible. Embrace the discipline that, in the end, sets you free.", p: "What structure or limitation is actually serving your growth right now?" },
+  61: { w: "Your sincerity is your most powerful asset. When you speak and act from your deepest truth, you move hearts in ways that strategy cannot.", p: "What is the most honest thing you could say about where you are right now in your life?" },
+  62: { w: "Pay attention to the details others overlook. Precision and care in small things creates the foundation for large outcomes.", p: "What small but important thing have you been overlooking or postponing?" },
+  63: { w: "A significant chapter is complete. Celebrate it — and then look ahead with clear eyes, because every completion contains a new beginning.", p: "What have you recently completed or outgrown? How are you honoring that transition?" },
+  64: { w: "You are between chapters — the old has ended, the new hasn't fully arrived. This liminal space is sacred. Don't rush it.", p: "What are you in the middle of that requires you to trust the process rather than force the outcome?" }
+};
+
+const TAO_QUOTES = [
+  { text: "The journey of a thousand miles begins with a single step.", attr: "Tao Te Ching, Chapter 64" },
+  { text: "Knowing others is wisdom. Knowing yourself is enlightenment.", attr: "Tao Te Ching, Chapter 33" },
+  { text: "When you realize there is nothing lacking, the whole world belongs to you.", attr: "Tao Te Ching, Chapter 44" },
+  { text: "Nature does not hurry, yet everything is accomplished.", attr: "Lao Tzu" },
+  { text: "Water is fluid, soft, and yielding. But water will wear away rock, which is rigid and cannot yield.", attr: "Lao Tzu" },
+  { text: "Do you have the patience to wait until your mud settles and the water is clear?", attr: "Tao Te Ching, Chapter 15" },
+  { text: "To the mind that is still, the whole universe surrenders.", attr: "Chuang Tzu" },
+  { text: "Simplicity, patience, compassion — these three are your greatest treasures.", attr: "Tao Te Ching, Chapter 67" },
+  { text: "When I let go of what I am, I become what I might be.", attr: "Lao Tzu" },
+  { text: "He who knows, does not speak. He who speaks, does not know.", attr: "Tao Te Ching, Chapter 56" },
+  { text: "Fill your bowl to the brim and it will spill. Keep sharpening your knife and it will blunt.", attr: "Tao Te Ching, Chapter 9" },
+  { text: "Life is a series of natural and spontaneous changes. Don't resist them.", attr: "Lao Tzu" },
+  { text: "Act without expectation.", attr: "Tao Te Ching, Chapter 2" },
+  { text: "The more you know, the less you understand.", attr: "Tao Te Ching, Chapter 47" },
+  { text: "In dwelling, live close to the ground. In thinking, keep to the simple.", attr: "Tao Te Ching, Chapter 8" }
+];
+
+const HEX_FORTUNE_EN = { '大吉': 'Very Favorable', '吉': 'Favorable', '中': 'Neutral', '凶': 'Challenging' };
+
+const hex = getHexagramByDate(today);
+const wisdom = HEX_WISDOM[hex.id] || { w: hex.desc, p: 'What does this wisdom mean for your life today?' };
+const enName = HEX_EN_NAMES[hex.id] || hex.name;
+const fortuneEn = HEX_FORTUNE_EN[hex.fortune] || hex.fortune;
+
+document.getElementById('hex-symbol').textContent = hex.symbol;
+document.getElementById('hex-name').textContent = hex.name;
+document.getElementById('hex-en-name').textContent = enName;
+document.getElementById('hex-lines').innerHTML = drawHexagram(hex);
+document.getElementById('hex-wisdom').textContent = wisdom.w;
+document.getElementById('hex-prompt').textContent = wisdom.p;
+document.getElementById('hex-original').textContent = hex.brief;
+document.getElementById('hex-source').textContent = `— I Ching, Hexagram ${hex.id} · ${hex.name} (${hex.upper}/${hex.lower})`;
+
+const chip = document.getElementById('hex-fortune-chip');
+chip.textContent = fortuneEn;
+if (hex.fortune === '大吉' || hex.fortune === '吉') chip.classList.add('great');
+else if (hex.fortune === '凶') chip.classList.add('challenging');
+
+const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+const q = TAO_QUOTES[dateSeed % TAO_QUOTES.length];
+document.getElementById('tao-quote').textContent = q.text;
+document.getElementById('tao-attr').textContent = '— ' + q.attr;
+</script>
+</body>
+</html>
